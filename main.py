@@ -4,8 +4,7 @@ expand this later to be an actual app
 """
 
 def main() -> None:
-    """
-    Simple hello, world
+    """simple hello, world
     """
     print("Hello, world!")
 
