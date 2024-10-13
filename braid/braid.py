@@ -18,6 +18,7 @@ class Braid:
     def __init__(self, n: int) -> None:
         self.__n = n
         self.__gens: list[BraidGenerator] = []
+        self.__iter_index: int = 0
 
     # def set_gens(self, gens: list[BraidGenerator]) -> None:
     #     """Sets the generators of this braid word; expects
@@ -68,8 +69,7 @@ class Braid:
                 braids don't line up in their n
         """
         self.__check_compatible(second)
-        # pylint: disable=protected-access
-        self.__gens.extend(second.__gens)
+        self.__gens.extend(second)
 
     def __check_gen_valid(self, gen: BraidGenerator) -> None:
         """Raises an exception when the gen can't go in
@@ -113,6 +113,18 @@ class Braid:
         self.__check_gen_valid(before)
 
         self.__gens = [before] + self.__gens
+
+    def __iter__(self) -> Braid:
+        self.__iter_index = 0
+        return self
+
+    def __next__(self) -> BraidGenerator:
+        if self.__iter_index >= len(self.__gens):
+            raise StopIteration
+        else:
+            next_gen = self.__gens[self.__iter_index]
+            self.__iter_index += 1
+            return next_gen
 
 class StrandMismatchException(Exception):
     """
