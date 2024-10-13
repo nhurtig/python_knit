@@ -18,7 +18,7 @@ class Braid:
     def __init__(self, n: int) -> None:
         self.__n = n
         self.__gens: list[BraidGenerator] = []
-        self.__iter_index: int = 0
+        self.__iter_index: int = -1
 
     # def set_gens(self, gens: list[BraidGenerator]) -> None:
     #     """Sets the generators of this braid word; expects
@@ -121,10 +121,9 @@ class Braid:
     def __next__(self) -> BraidGenerator:
         if self.__iter_index >= len(self.__gens):
             raise StopIteration
-        else:
-            next_gen = self.__gens[self.__iter_index]
-            self.__iter_index += 1
-            return next_gen
+        next_gen = self.__gens[self.__iter_index]
+        self.__iter_index += 1
+        return next_gen
 
 class StrandMismatchException(Exception):
     """
