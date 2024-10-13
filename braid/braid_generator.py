@@ -13,9 +13,9 @@ class BraidGenerator:
     sign is pos when the left strand
     goes over the right
     """
-    def __init__(self, i: int, sign: Sign) -> None:
+    def __init__(self, i: int, sign: bool) -> None:
         self.__i = i
-        self.__sign = sign
+        self.__sign = Sign(sign)
 
     def i(self) -> int:
         """Getter
@@ -25,10 +25,10 @@ class BraidGenerator:
         """
         return self.__i
 
-    def sign(self) -> Sign:
-        """Getter
+    def pos(self) -> bool:
+        """Essentially a getter
 
         Returns:
-            Sign: pos if left over right else neg
+            bool: True if left over right else False
         """
-        return self.__sign
+        return self.__sign.pos()

@@ -20,6 +20,8 @@ class Braid:
         self.__gens: list[BraidGenerator] = []
         self.__iter_index: int = -1
 
+
+
     # def set_gens(self, gens: list[BraidGenerator]) -> None:
     #     """Sets the generators of this braid word; expects
     #     braid word to be empty to start.
@@ -70,6 +72,113 @@ class Braid:
         """
         self.__check_compatible(second)
         self.__gens.extend(second)
+
+    def reverse(self) -> tuple[Braid, Braid]:
+        """Puts a braid word into its reversed
+        form; returns braid words
+        that make it up
+
+        Returns:
+            tuple[Braid, Braid]: (x, y) where
+            x is all pos, y is all neg, and x * y
+            is the original
+        """
+        for (gen_index, g1) in enumerate(self):
+            g2 = self.__gens[gen_index+1]
+            if not g1.pos() and g2.pos():
+                i = g1.i()
+                j = g2.i()
+
+                prefix = self.__gens[:gen_index]
+                middle = Braid.reverse_helper(i, j)
+                suffix = self.__gens[gen_index + 2:]
+
+                self.__gens = prefix + middle + suffix
+                self.reverse()
+
+        leading_pos = Braid(self.n())
+        ending_neg = Braid(self.n())
+
+        for gen in self:
+            if gen.pos():
+                leading_pos.append(gen)
+            else:
+                ending_neg.append(gen)
+
+        return (leading_pos, ending_neg)
+
+    def reverse_gens(self) -> None:
+        """Reverses the order of
+        generators in the braid word
+        """
+        self.__gens.reverse()
+
+    def invert_gens(self) -> None:
+        """Inverts each of the generators,
+        but doesn't change their order
+        """
+        for i, g in enumerate(self.__gens):
+            self.__gens[i] = BraidGenerator(g.i(), not g.pos())
+
+    def invert(self) -> None:
+        """Converts into the exact inverse
+        of the given braid word
+        """
+        self.reverse_gens()
+        self.invert_gens()
+
+    def simple_perm(self) -> list[int]:
+        """Converts to a permutation.
+        Raises NotSimpleError if
+        this list doesn't represent a permutation
+
+        Raises:
+            NotSimpleError: Raised if
+            the braid isn't simple
+
+        Returns:
+            list[int]: image of the permutation
+            if the braid is simple
+        """
+        perm: list[int] = list(range(self.n()))
+        crossings: set[int] = set()
+        for g in self:
+            if not g.pos():
+                raise NotSimpleError()
+            over = perm.index(g.i())
+            under = perm.index(g.i() + 1)
+
+            key = over * self.n() + under
+            if key in crossings:
+                raise NotSimpleError()
+            crossings.add(key)
+
+            perm[over] = g.i() + 1
+            perm[under] = g.i()
+
+        return perm
+
+    @staticmethod
+    def reverse_helper(i: int, j: int) -> list[BraidGenerator]:
+        """Rewrites sigma_i^{-1} sigma_j
+        according to reversing rules
+
+        Args:
+            i (int): index of first, inverse
+            j (int): index of second, noninverse
+
+        Returns:
+            list[BraidGenerator]: new reversed word
+            equivalent to the original
+        """
+        match abs(i - j):
+            case 0:
+                return []
+            case 1:
+                return [BraidGenerator(j, True), BraidGenerator(i, True),
+                        BraidGenerator(j, False), BraidGenerator(i, False)]
+            case _:
+                return [BraidGenerator(j, True), BraidGenerator(i, False)]
 
     def __check_gen_valid(self, gen: BraidGenerator) -> None:
         """Raises an exception when the gen can't go in
@@ -144,4 +253,9 @@ class WordNotEmptyException(Exception):
     Raised when a braid word was supposed
     to be empty but wasn't (setting a
     word's generators)
+    """
+class NotSimpleError(Exception):
+    """
+    Raised whenever a braid was expected
+    to be simple but wasn't
     """

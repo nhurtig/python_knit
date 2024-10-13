@@ -5,8 +5,9 @@ simple (aka positive permutation)
 braids
 """
 
+from __future__ import annotations
 from braid.braid import Braid
-
+from braid.braid_generator import BraidGenerator
 
 class Permutation:
     """
@@ -14,50 +15,69 @@ class Permutation:
     map [n] -> [n]
     """
 
-    def __init__(self, simple: Braid) -> None:
-        self.__perm = Permutation.make_perm(simple)
+    def __init__(self, perm: list[int]) -> None:
+        self.__perm = perm
 
-    @staticmethod
-    def make_perm(b: Braid) -> list[int]:
-        """Raises NotAPermutationError if
-        this list doesn't represent a permutation
+    def n(self) -> int:
+        """Computes number of strands
+        in the permutation braid
 
-        Args:
-            perm (Braid): Braid, hopefully simple,
-            to be converted
-
-        Raises:
-            NotSimpleError: Raised if
-            the braid isn't simple
+        Returns:
+            int: length of the permutation
         """
+        return len(self.__perm)
 
-        # Keep track of
-        # who has crossed who; raise
-        # exception if there's a double
-        # cross. Raise exception if
-        # a gen is negative
+    def is_delta(self) -> bool:
+        """Computes whether this braid
+        is the Delta braid
 
-        perm: list[int] = list(range(b.n()))
-        crossings: set[int] = set()
-        for g in b:
-            if not g.sign.is_pos():
-                raise NotSimpleError()
-            over = perm.index(g.i())
-            under = perm.index(g.i() + 1)
+        Returns:
+            bool: whether this permutation
+            is the reverse permutation
+        """
+        return self.__perm == list(range(self.n() - 1, -1, -1))
 
-            key = over * b.n() + under
-            if key in crossings:
-                raise NotSimpleError()
-            crossings.add(key)
+    def is_identity(self) -> bool:
+        """Computes whether this braid
+        is the identity braid
 
-            perm[over] = g.i() + 1
-            perm[under] = g.i()
+        Returns:
+            bool: whether this permutation
+            is the identity permutation
+        """
+        return self.__perm == list(range(0, self.n()))
 
-        return perm
+    def left_divisor(self) -> Permutation:
+        """Computes and returns the left
+        divisor of self.
 
-class NotSimpleError(Exception):
-    """
-    Raised whenever you tried to make a permutation
-    out of a list that didn't represent a
-    bijection
-    """
+        Returns:
+            Permutation: x such
+            that x * self = Delta
+        """
+        new_perm = []
+        for i in range(self.n()):
+            end = self.n() - i - 1
+            middle = self.__perm.index(end)
+            new_perm.append(middle)
+
+        return Permutation(new_perm)
+
+    def to_simple(self) -> Braid:
+        """Makes a simple braid
+        from the permutation
+
+        Returns:
+            Braid: Unique simple braid
+            that permutes strands
+            like the input permutation
+        """
+        b = Braid(self.n())
+        perm = self.__perm.copy()
+        while len(perm) > 0:
+            rightmost = perm.index(len(perm) - 1)
+            for i in range(rightmost, len(perm) - 1):
+                b.append(BraidGenerator(i, True))
+            # update perm
+            perm.pop(rightmost)
+        return b
