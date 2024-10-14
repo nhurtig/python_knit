@@ -60,7 +60,7 @@ class BraidGenerator:
     def __repr__(self) -> str:
         return chr(ord('a' if self.pos() else 'A') + self.i())
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, BraidGenerator):
             return False
         return self.i() == other.i() and self.pos() == other.pos()

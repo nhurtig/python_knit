@@ -46,7 +46,7 @@ class Braid:
         return self.__n
 
     @staticmethod
-    def delta(n: int, pos=True) -> Braid:
+    def delta(n: int, pos: bool=True) -> Braid:
         """Constructs the delta braid
         on n strands
 
@@ -192,7 +192,7 @@ class Braid:
         self.reverse_gens()
         self.invert_gens()
 
-    def simple_perm(self, ignore=False) -> list[int]:
+    def simple_perm(self, ignore: bool=False) -> list[int]:
         """Converts to a permutation.
         Raises NotSimpleError if
         this list doesn't represent a permutation
@@ -295,6 +295,23 @@ class Braid:
 
         self.__gens = [before] + self.__gens
 
+    def subbraid(self, keep: set[int]) -> Braid:
+        b = Braid(len(keep))
+        for g in self:
+            i = g.i()
+            if i in keep:
+                if i + 1 in keep:
+                    j = len(list(filter(lambda x: x < i, keep)))
+                    b.append(BraidGenerator(j, g.pos()))
+                else:
+                    keep.remove(i)
+                    keep.add(i+1)
+            else:
+                if i + 1 in keep:
+                    keep.remove(i + 1)
+                    keep.add(i)
+        return b
+
     def __iter__(self) -> Braid:
         self.__iter_index = 0
         return self
@@ -309,7 +326,7 @@ class Braid:
     def __repr__(self) -> str:
         return f"Braid(n={self.__n}, {self.__gens})"
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, Braid):
             return False
         return self.n() == other.n() and list(iter(self)) == list(iter(other))

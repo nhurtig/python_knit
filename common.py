@@ -74,7 +74,7 @@ class Dir(Flippable):
     def __init__(self, is_right: bool) -> None:
         self.__is_right = is_right
 
-    def pos(self) -> bool:
+    def right(self) -> bool:
         """Getter
 
         Returns:
