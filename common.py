@@ -21,8 +21,8 @@ class Flippable(ABC): # pylint: disable=too-few-public-methods
         """
         return Flippable._from_bool(not self._to_bool())
 
-    @abstractmethod
     @staticmethod
+    @abstractmethod
     def _from_bool(b: bool) -> Flippable:
         """Makes a new Flippable from a bool
 

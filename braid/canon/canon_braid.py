@@ -23,6 +23,9 @@ class CanonBraid:
         for simple_braid in intermediate:
             self.__perms.append(Permutation(simple_braid.simple_perm()))
 
+    def __repr__(self) -> str:
+        return f"CanonBraid(n={self.__n}, Delta^({self.__m}, {self.__perms})"
+
 class ProgressiveCanonBraid:
     """Less mathematical representation;
     keeps simple braids as ordered indices
@@ -62,20 +65,60 @@ class ProgressiveCanonBraid:
             s: Braid = self.__ss.pop()
 
             if g.pos():
+                # P-tile
+                # Represent su as
+                # u' s' where u' >= s'
+                # Let u' = alpha(s u)
+                # and that determines
+                # s'.
+                # alpha( s u )
+                # = gcd_L( s u, \Delta_n)
+                s.concat(u)
+                su_perm = s.simple_perm(ignore=True)
+                u_prime = s.head()
+                # left-gcd can be calced by guessing a gen to
+                # divide both a and b and then iterating w/
+                # the quotients sig \ a, sig \ b.
+                #
+                # 4.8 says grid source (u, v) target (u', v')
+                # means v' = u \ v and u' = v \ u
+                # SO: append inv sig to the word, reverse,
+                # and see if something interesting happens?
+                # Success would be v' \neq v and fail
+                # is v' == v, I think
+                s_prime = Permutation(u_prime.simple_perm()).right_divisor(su_perm).to_simple()
+            else:
+                # C-tile
+                # Calculate s' = u / s (left complement)
+                # u' = s / u
+                # then s' u = u' s = LCM_L(s, u) = LCM_L(u, s)
+                # also s', u' are simple
+                # also GCD_L(s', t') = 1
+                # hence C-tile
+
+                # NOTE: according to book page 108, I am
+                # doing right complement, not left here.
+                # oops? We'll see how this shakes out
+                # if len(list(s)) == 3 and len(list(u)) == 1:
+                #     print("HI!")
+
+                # below lines worked for first 6
+                # u.invert()
+                # u.concat(s)
+                # (s_prime, u_prime) = u.reverse()
+                # s_prime.reverse_gens()
+                # u_prime.invert_gens()
+
                 s.invert_gens()
+                u.reverse_gens()
                 s.concat(u)
                 (u_prime, s_prime) = s.reverse()
+                u_prime.reverse_gens()
                 s_prime.invert_gens()
-            else:
-                u.invert_gens()
-                s.reverse_gens()
-                u.concat(s)
-                (s_prime, u_prime) = u.reverse()
-                s_prime.reverse_gens()
-                u_prime.invert_gens()
 
             u = u_prime
-            s_primes = [s_prime] + s_primes
+            if len(list(s_prime)) > 0:
+                s_primes = [s_prime] + s_primes
 
         p = Permutation(u.simple_perm())
         if g.pos():
@@ -92,6 +135,7 @@ class ProgressiveCanonBraid:
                 self.__ss = [p.left_divisor().to_simple()] + s_primes
 
     def __iter__(self) -> ProgressiveCanonBraid:
+        self.__iter_index = 0
         return self
 
     def __next__(self) -> Braid:
@@ -100,3 +144,6 @@ class ProgressiveCanonBraid:
         s = self.__ss[self.__iter_index]
         self.__iter_index += 1
         return s
+
+    def __repr__(self) -> str:
+        return f"PCanonBraid(n={self.__n}, Delta^({self.__m}, {self.__ss})"

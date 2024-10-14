@@ -6,7 +6,7 @@ braids
 """
 
 from __future__ import annotations
-from braid.braid import Braid
+from braid.braid import Braid, StrandMismatchException
 from braid.braid_generator import BraidGenerator
 
 class Permutation:
@@ -63,6 +63,35 @@ class Permutation:
 
         return Permutation(new_perm)
 
+    def right_divisor(self, goal: list[int]) -> Permutation:
+        """Computes and returns the right
+        divisor of self in goal.
+
+        Args:
+            goal (Permutation): Permutation
+            meant to be reached by self and
+            the return value
+
+        Returns:
+            Permutation: x such
+            that self * x = goal
+        """
+        if self.n() != len(goal):
+            raise StrandMismatchException()
+
+        new_perm = [-1] * self.n()
+        for i in range(self.n()):
+            # strand name sent to
+            # new perm's index i
+            strand_id = self.__perm.index(i)
+            # goal index
+            end = goal[strand_id]
+            # I want to send that strand
+            # name to that index
+            new_perm[i] = end
+
+        return Permutation(new_perm)
+
     def to_simple(self) -> Braid:
         """Makes a simple braid
         from the permutation
@@ -81,3 +110,6 @@ class Permutation:
             # update perm
             perm.pop(rightmost)
         return b
+
+    def __repr__(self) -> str:
+        return f"{self.__perm}"

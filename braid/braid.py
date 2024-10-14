@@ -4,7 +4,7 @@ and canonicalization of braids
 """
 
 from __future__ import annotations
-from braid_generator import BraidGenerator
+from braid.braid_generator import BraidGenerator
 
 class Braid:
     """
@@ -45,6 +45,69 @@ class Braid:
         """
         return self.__n
 
+    @staticmethod
+    def delta(n: int, pos=True) -> Braid:
+        """Constructs the delta braid
+        on n strands
+
+        Args:
+            n (int): Number of strands
+            pos (bool, optional): Whether the
+            crossings are positive. Defaults to True.
+
+        Returns:
+            Braid: Delta braid
+        """
+        d = Braid(n)
+        for i in range(n-1, -1, -1):
+            # strand 0 to index i
+            for j in range(i):
+                d.append(BraidGenerator(j, pos))
+        return d
+
+    def left_gcd(self, other: Braid) -> Braid:
+        if self.n() != other.n():
+            raise StrandMismatchException()
+
+        gcd = Braid(self.n())
+        for g in self.__left_gcd_helper(other, 0):
+            gcd.append(g)
+
+        return gcd
+
+    def __left_gcd_helper(self, other: Braid, i0: int) -> list[BraidGenerator]:
+        for i in range(i0, self.n() - 1):
+            g1 = Braid(self.n())
+            g1.append(BraidGenerator(i, False))
+            g1.concat(self)
+
+            (self_quotient, leftovers) = g1.reverse()
+
+            if len(list(leftovers)) != 0:
+                continue
+
+            g2 = Braid(self.n())
+            g2.append(BraidGenerator(i, False))
+            g2.concat(other)
+
+            (other_quotient, leftovers) = g2.reverse()
+
+            if len(list(leftovers)) != 0:
+                continue
+
+            return [BraidGenerator(i, True)] + self_quotient.__left_gcd_helper(other_quotient, 0)
+        return []
+
+    def head(self) -> Braid:
+        """Computes the head, or
+        alpha, of the braid
+
+        Returns:
+            Braid: Largest simple
+            divisor of self
+        """
+        return self.left_gcd(Braid.delta(self.n()))
+
     def __check_compatible(self, other: Braid) -> None:
         """Raises an exception when the braids can't
             be concatenated; otherwise does nothing
@@ -84,6 +147,8 @@ class Braid:
             is the original
         """
         for (gen_index, g1) in enumerate(self):
+            if gen_index + 1 == len(self.__gens):
+                continue
             g2 = self.__gens[gen_index+1]
             if not g1.pos() and g2.pos():
                 i = g1.i()
@@ -127,29 +192,37 @@ class Braid:
         self.reverse_gens()
         self.invert_gens()
 
-    def simple_perm(self) -> list[int]:
+    def simple_perm(self, ignore=False) -> list[int]:
         """Converts to a permutation.
         Raises NotSimpleError if
         this list doesn't represent a permutation
+        and ignore is False
+
+        Args:
+            ignore (bool): default False to
+            raise NotSimpleError when not simple;
+            True to ignore errors
 
         Raises:
             NotSimpleError: Raised if
-            the braid isn't simple
+            the braid isn't simple and
+            ignore is False
 
         Returns:
             list[int]: image of the permutation
-            if the braid is simple
+            if the braid is simple or ignore
+            is True
         """
         perm: list[int] = list(range(self.n()))
         crossings: set[int] = set()
         for g in self:
-            if not g.pos():
+            if not ignore and not g.pos():
                 raise NotSimpleError()
             over = perm.index(g.i())
             under = perm.index(g.i() + 1)
 
             key = over * self.n() + under
-            if key in crossings:
+            if not ignore and key in crossings:
                 raise NotSimpleError()
             crossings.add(key)
 
@@ -194,7 +267,6 @@ class Braid:
         if gen.i() < 0 or gen.i() > self.n() - 2:
             raise GeneratorOutOfBoundsException()
 
-
     def append(self, after: BraidGenerator) -> None:
         """Puts a generator at the end of a word
 
@@ -233,6 +305,14 @@ class Braid:
         next_gen = self.__gens[self.__iter_index]
         self.__iter_index += 1
         return next_gen
+
+    def __repr__(self) -> str:
+        return f"Braid(n={self.__n}, {self.__gens})"
+
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, Braid):
+            return False
+        return self.n() == other.n() and list(iter(self)) == list(iter(other))
 
 class StrandMismatchException(Exception):
     """
