@@ -1,0 +1,148 @@
+\usepackage{tikz}
+\usepackage{ifthen}
+\usepackage{amsmath, amssymb}
+
+% Declare layers for drawing swaps
+\pgfdeclarelayer{swaps}
+\pgfdeclarelayer{boxes}
+\pgfsetlayers{swaps,main,boxes}
+
+% CONSTANTS
+
+\newcommand{\dxNoUnit}{1.3}            % width of tile without units
+\newcommand{\dyNoUnit}{0.7}            % height of tile without units
+\newcommand{\dx}{\dxNoUnit cm}         % width of tile with units
+\newcommand{\dy}{\dyNoUnit cm}         % height of tile with units
+\newcommand{\strandThickness}{0.07}    % proportion of tile width
+\newcommand{\outlineThickness}{0.15}   % white outline for crossings, proportion of width
+\newcommand{\knitThickness}{0.07}      % proportion of tile width
+\newcommand{\myPi}{3.1415926535}       % approximation of Pi
+% \newcommand{\myPi}{3}                % alternative simplified value for Pi
+\newcommand{\strandOverlap}{0.005}     % proportion of tile width for overlap
+\newcommand{\loopSpace}{4}             % proportion of strand thickness for loop spacing
+
+% COMMANDS
+
+% Environment for knit diagrams
+\newenvironment{knitdiagram}{\begin{tikzpicture}}{\end{tikzpicture}}
+
+% Helper for drawing smooth knit lines (x, y, bias, x offset, style, r, g, b)
+\newcommand{\lineknithelper}[8]{
+    \pgfsys@color@rgb@stroke{#6}{#7}{#8}
+    \draw [smooth, samples=30, domain=0-\strandOverlap:1+\strandOverlap, #5]
+    plot(
+        {
+            #4*\dxNoUnit + #1*\dxNoUnit + 0.5*\dxNoUnit + 0.5*\dxNoUnit*#3 + \dxNoUnit*0.5*#3
+            *
+            (2 * (-2*\x*\x*\x + 3 * \x * \x) - 1)
+            % sin(deg(\myPi*\x - 0.5*\myPi))
+        },
+        {
+            #2*\dyNoUnit + \x*\dyNoUnit
+        }
+    );
+}
+
+% Draw knit lines (x, y, bias, object, r, g, b, style)
+\newcommand{\lineknit}[8]{
+    \ifthenelse{\equal{#4}{l}}{
+        \lineknithelper{#1}{#2}{#3}{-\loopSpace*\strandThickness}{#8}{#5}{#6}{#7}
+        \lineknithelper{#1}{#2}{#3}{\loopSpace*\strandThickness}{#8}{#5}{#6}{#7}
+    }{
+        \lineknithelper{#1}{#2}{#3}{0}{#8}{#5}{#6}{#7}
+    }
+}
+
+% Knit identity line (x, y, bias, object, r, g, b)
+\newcommand{\identity}[7]{
+    \lineknit{#1}{#2}{#3}{#4}{#5}{#6}{#7}{line width=\strandThickness*\dx}
+}
+
+% Drop stitches
+\newcommand{\drop}[2]{
+    \draw [line width=\strandThickness*\dx]
+    (#1*\dx+0.5*\dx-\strandThickness*\loopSpace*\dx,#2*\dy)
+    arc[start angle=180, end angle=0, radius=\strandThickness*\loopSpace*\dx];
+}
+
+% Knit in stitch
+\newcommand{\inknit}[2]{
+    \draw [line width=\strandThickness*\dx]
+    (#1*\dx+0.5*\dx,#2*\dy+0.5*\dy) -- (#1*\dx+0.5*\dx,#2*\dy+1*\dy+\strandOverlap*\dy);
+    \filldraw (#1*\dx+0.5*\dx,#2*\dy+0.5*\dy) circle (\strandThickness*\dx);
+}
+
+% Knit out stitch
+\newcommand{\out}[2]{
+    \draw [line width=\strandThickness*\dx]
+    (#1*\dx+0.5*\dx,#2*\dy-\strandOverlap*\dy) -- (#1*\dx+0.5*\dx,#2*\dy+0.5*\dy);
+    \filldraw (#1*\dx+0.5*\dx,#2*\dy+0.5*\dy) circle (\strandThickness*\dx);
+}
+
+% Sigma knit (pos/neg, left, right, x, y)
+\newcommand{\sigmaknit}[5]{
+    \begin{pgfonlayer}{swaps}
+    \ifthenelse{\equal{#1}{pos}}{
+        \identity{(#4+1)}{#5}{-1}{#3}
+        \lineknit{#4}{#5}{1}{#2}{line width=\outlineThickness*\dx, color=white}
+        \identity{#4}{#5}{1}{#2}
+    }{
+        \identity{#4}{#5}{1}{#2}
+        \lineknit{(#4+1)}{#5}{-1}{#3}{line width=\outlineThickness*\dx, color=white}
+        \identity{(#4+1)}{#5}{-1}{#3}
+    }
+    \end{pgfonlayer}
+}
+
+% Twist knit (pos/neg, x, y, r, g, b)
+\newcommand{\twist}[6]{
+    \begin{pgfonlayer}{swaps}
+    \ifthenelse{\equal{#1}{pos}}{
+        \identity{(#2+\loopSpace*\strandThickness)}{#3}{-2*\loopSpace*\strandThickness}{c}{#4}{#5}{#6}
+        \lineknit{(#2-\loopSpace*\strandThickness)}{#3}{2*\loopSpace*\strandThickness}{c}{1}{1}{1}{line width=\outlineThickness*\dx, color=white}
+        \identity{(#2-\loopSpace*\strandThickness)}{#3}{2*\loopSpace*\strandThickness}{c}{#4}{#5}{#6}
+    }{
+        \identity{(#2-\loopSpace*\strandThickness)}{#3}{2*\loopSpace*\strandThickness}{c}{#4}{#5}{#6}
+        \lineknit{(#2+\loopSpace*\strandThickness)}{#3}{-2*\loopSpace*\strandThickness}{c}{1}{1}{1}{line width=\outlineThickness*\dx, color=white}
+        \identity{(#2+\loopSpace*\strandThickness)}{#3}{-2*\loopSpace*\strandThickness}{c}{#4}{#5}{#6}
+    }
+    \end{pgfonlayer}
+}
+
+% Knit shape (direction, bed, num in, num out, x, y)
+\newcommand{\knit}[6]{
+\begin{pgfonlayer}{boxes}
+    \draw [line width=\knitThickness*\dx]
+    (#5*\dx,#6*\dy) -- (#5*\dx+#3*\dx,#6*\dy) -- (#5*\dx+#4*\dx,#6*\dy+\dy)
+    -- (#5*\dx,#6*\dy+\dy) -- (#5*\dx,#6*\dy) -- (#5*\dx+#3*\dx,#6*\dy)
+    -- (#5*\dx+#4*\dx,#6*\dy+\dy);
+    \node[anchor=west] at (#5*\dx,#6*\dy+0.5*\dy) {\knitlabel{#1}{#2}};
+\end{pgfonlayer}
+}
+
+% Knit label (direction, bed)
+\newcommand{\knitlabel}[2]{%
+    \ifthenelse{\equal{#2}{front}}{%
+        \ifthenelse{\equal{#1}{right}}{%
+            $\blacktriangleright$ % Front Right
+        }{%
+            $\vartriangleright$ % Front Left
+        }%
+    }{%
+        \ifthenelse{\equal{#1}{right}}{%
+            $\vartriangleleft$ % Back Right
+        }{%
+            $\blacktriangleleft$ % Back Left
+        }%
+    }%
+}
+
+% Bed knit direction
+\newcommand{\bedknit}[1]{%
+    \ifthenelse{\equal{#1}{front}}{F}{B}%
+}
+
+% Knit direction
+\newcommand{\dirknit}[1]{%
+    \ifthenelse{\equal{#1}{right}}{R}{L}%
+}

@@ -5,8 +5,10 @@ and canonicalization of braids
 
 from __future__ import annotations
 from braid.braid_generator import BraidGenerator
+from category.object import PrimitiveObject
+from latex import Latex
 
-class Braid:
+class Braid(Latex):
     """
     Represents a word in the braid
     group using a list of generators.
@@ -330,6 +332,25 @@ class Braid:
         if not isinstance(other, Braid):
             return False
         return self.n() == other.n() and list(iter(self)) == list(iter(other))
+
+    def to_latex(self, x: int, y: int, context: list[PrimitiveObject]) -> str:
+        str_latex = ""
+        for g in self:
+            str_latex += g.to_latex(x, y, context)
+            y += g.latex_height()
+            context = g.context_out(context)
+
+        return str_latex
+
+    def latex_height(self) -> int:
+        return len(list(self))
+
+    def context_out(self, context: list[PrimitiveObject]) -> list[PrimitiveObject]:
+        for g in self:
+            context = g.context_out(context)
+
+        return context
+
 
 class StrandMismatchException(Exception):
     """

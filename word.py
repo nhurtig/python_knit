@@ -51,14 +51,14 @@ class CanonWord(Latex):
         # TODO: implement
         raise NotImplementedError
 
-class Word:
+class Word(Latex):
     def __init__(self) -> None:
         self.__layers: list[Layer] = []
         self.__iter_index = -1
 
     # TODO: keep track of the above braid
     # and construct the Layer from a Knit
-    # and the Braid
+    # and the Braid (good for building from another form)
     def append_layer(self, l: Layer) -> None:
         self.__layers.append(l)
 
@@ -80,3 +80,22 @@ class Word:
         if not isinstance(other, Word):
             return False
         return list(iter(self)) == list(iter(other))
+
+    def to_latex(self, x: int, y: int, context: list[PrimitiveObject]) -> str:
+        assert context == []
+        latex_str = ""
+        for l in self:
+            latex_str += l.to_latex(x, y, context)
+            y += l.latex_height()
+            context = l.context_out(context)
+        return latex_str
+
+    def latex_height(self) -> int:
+        h = 0
+        for l in self:
+            h += l.latex_height()
+        return h
+
+    def context_out(self, context: list[PrimitiveObject]) -> list[PrimitiveObject]:
+        # TODO: implement
+        raise NotImplementedError

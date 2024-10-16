@@ -19,7 +19,7 @@ class PrimitiveObject(ABC):
     def twists(self) -> int:
         pass
 
-    def color(self) -> tuple[int, int, int]:
+    def color(self) -> tuple[float, float, float]:
         return self.__color
 
 class Carrier(PrimitiveObject):

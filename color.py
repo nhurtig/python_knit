@@ -1,11 +1,12 @@
+from __future__ import annotations
 import colorsys
 
 class ColorGenerator:
-    def __init__(self):
+    def __init__(self) -> None:
         self.hue = 0.0  # Initial hue value
         self.golden_ratio_conjugate = 0.61803398875  # Approximate value of the golden ratio conjugate
 
-    def get_next_color(self):
+    def get_next_color(self) -> tuple[float, float, float]:
         # Increment hue by the golden ratio
         self.hue += self.golden_ratio_conjugate
         self.hue %= 1.0  # Ensure hue wraps around between 0 and 1

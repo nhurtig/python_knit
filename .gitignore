@@ -2,3 +2,7 @@ __pycache__
 
 .vscode/launch.json
 .vscode/settings.json
+
+*braid*.txt
+*basic*.txt
+*.pdf

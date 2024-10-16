@@ -4,9 +4,11 @@ algorithm going on here.
 """
 
 from __future__ import annotations
+from category.object import PrimitiveObject
 from common import Sign
+from latex import Latex
 
-class BraidGenerator:
+class BraidGenerator(Latex):
     """
     The sigma_i^e that make up
     braid words. i represents the
@@ -64,3 +66,36 @@ class BraidGenerator:
         if not isinstance(other, BraidGenerator):
             return False
         return self.i() == other.i() and self.pos() == other.pos()
+
+    def to_latex(self, x: int, y: int, context: list[PrimitiveObject]) -> str:
+        str_latex = ""
+
+        o_left = context[self.i()]
+        (rl, gl, bl) = o_left.color()
+        o_right = context[self.i() + 1]
+        (rr, gr, br) = o_right.color()
+
+        if self.pos():
+            str_latex += f"\\identity{{{x+self.i()+1}}}{{{y}}}{{{-1}}}{{{o_right}}}{{{rr}}}{{{gr}}}{{{br}}}\n"
+            str_latex += f"\\lineknit{{{x+self.i()}}}{{{y}}}{{{1}}}{{{o_left}}}{{{1}}}{{{1}}}{{{1}}}{{line width=\\outlineThickness*\\dx, color=white}}\n"
+            str_latex += f"\\identity{{{x+self.i()}}}{{{y}}}{{{1}}}{{{o_left}}}{{{rl}}}{{{gl}}}{{{bl}}}\n"
+        else:
+            str_latex += f"\\identity{{{x+self.i()}}}{{{y}}}{{{1}}}{{{o_left}}}{{{rl}}}{{{gl}}}{{{bl}}}\n"
+            str_latex += f"\\lineknit{{{x+self.i()+1}}}{{{y}}}{{{-1}}}{{{o_right}}}{{{1}}}{{{1}}}{{{1}}}{{line width=\\outlineThickness*\\dx, color=white}}\n"
+            str_latex += f"\\identity{{{x+self.i()+1}}}{{{y}}}{{{-1}}}{{{o_right}}}{{{rr}}}{{{gr}}}{{{br}}}\n"
+        
+        for i, o in enumerate(context):
+            if i not in [self.i(), self.i() + 1]:
+                (r, g, b) = o.color()
+                str_latex += f"\\identity{{{x+i}}}{{{y}}}{{{0}}}{{{o}}}{{{r}}}{{{g}}}{{{b}}}\n"
+
+        return str_latex
+
+    def latex_height(self) -> int:
+        return 1
+
+    def context_out(self, context: list[PrimitiveObject]) -> list[PrimitiveObject]:
+        o_left = context[self.i()]
+        context[self.i()] = context[self.i() + 1]
+        context[self.i() + 1] = o_left
+        return context
