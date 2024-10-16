@@ -8,15 +8,48 @@ braids
 from __future__ import annotations
 from braid.braid import Braid, StrandMismatchException
 from braid.braid_generator import BraidGenerator
+from category.object import Carrier, PrimitiveObject
+from latex import Latex
 
-class Permutation:
+class Permutation(Latex):
     """
     A permutation is a bijective
     map [n] -> [n]
     """
 
     def __init__(self, perm: list[int]) -> None:
-        self.__perm = perm
+        self.__perm: list[int] = perm
+
+    def to_latex(self, x: int, y: int, context: list[PrimitiveObject]) -> str:
+        return self.to_latex_helper(x, y, context)
+
+    def to_latex_helper(self, x: int, y: int, context: list[PrimitiveObject], inv: bool=False) -> str:
+        # draw white of lowest strand
+        # draw black of lowest strand
+        # repeat for all strands
+
+        # lowest strand is the one that
+        # ends up on the left
+        str_latex = f"\\begin{{pgfonlayer}}{{swaps}}\n"
+        lowest_to_highest = list(range(self.n()))
+        if inv:
+            lowest_to_highest = list(reversed(lowest_to_highest))
+        for i in lowest_to_highest:
+            strand_start = self.__perm.index(i)
+            str_latex += f"\\lineknit{{{x+strand_start}}}{{{y}}}{{{i - strand_start}}}{{{context[strand_start]}}}{{line width=\\outlineThickness*\\dx, color=white}}\n"
+            str_latex += f"\\identity{{{x+strand_start}}}{{{y}}}{{{i - strand_start}}}{{{context[strand_start]}}}\n"
+        str_latex += f"\\end{{pgfonlayer}}\n"
+
+        return str_latex
+
+    def latex_height(self) -> int:
+        return 1
+
+    def context_out(self, context: list[PrimitiveObject]) -> list[PrimitiveObject]:
+        out: list[PrimitiveObject] = [Carrier(0)] * self.n()
+        for i in range(self.n()):
+            out[self.__perm[i]] = context[i]
+        return out
 
     def n(self) -> int:
         """Computes number of strands

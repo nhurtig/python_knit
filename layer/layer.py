@@ -2,7 +2,9 @@ from braid.braid import Braid
 from braid.braid_generator import BraidGenerator
 from braid.canon.canon_braid import CanonBraid
 from category.morphism import Knit
+from category.object import PrimitiveObject
 from common import Dir, Sign
+from latex import Latex
 
 class Layer:
     def __init__(self, left: int, middle: Knit, above: Braid, below: Braid) -> None:
@@ -119,7 +121,7 @@ class Layer:
     def layer_canon(self) -> CanonBraid:
         return CanonBraid(self.__above)
 
-class CanonLayer:
+class CanonLayer(Latex):
     def __init__(self, layer: Layer) -> None:
         CanonLayer.delta_step(layer)
         CanonLayer.macro_step(layer)
@@ -145,3 +147,23 @@ class CanonLayer:
                 layer.underline_conj(Dir(True), not gen.pos())
             else:
                 layer.sigma_conj(gen.i(), Sign(not gen.pos()))
+
+    def to_latex(self, x: int, y: int, context: list[PrimitiveObject]) -> str:
+        str_latex = ""
+        # Display box # TODO: make sure box knows it's responsible for displaying twists
+        box_context_in = context[self.__left:self.__left+len(self.__middle.ins())]
+        str_latex += self.__middle.to_latex(x+self.__left, y, box_context_in)
+        box_height = self.__middle.latex_height()
+        for i in list(range(self.__left)) + list(range(self.__left+len(self.__middle.ins()), len(context))):
+            for j in range(box_height):
+                str_latex += f"\\identity{{{x+i}}}{{{y+j}}}{{{0}}}{{{context[i]}}}\n"
+
+        str_latex += self.__above.to_latex(x, y + box_height, context[:self.__left] + self.__middle.context_out(box_context_in) + context[self.__left+len(self.__middle.ins()):])
+        return str_latex
+
+    def latex_height(self) -> int:
+        return self.__middle.latex_height() + self.__above.latex_height()
+
+    def context_out(self, context: list[PrimitiveObject]) -> list[PrimitiveObject]:
+        box_context_in = context[self.__left:self.__left+len(self.__middle.ins())]
+        return self.__above.context_out(context[:self.__left] + self.__middle.context_out(box_context_in) + context[self.__left+len(self.__middle.ins()):])

@@ -9,8 +9,10 @@ from __future__ import annotations
 from braid.braid import Braid
 from braid.braid_generator import BraidGenerator
 from braid.canon.permutation import Permutation
+from category.object import PrimitiveObject
+from latex import Latex
 
-class CanonBraid:
+class CanonBraid(Latex):
     """Mathematical representation of a
     greedy normal form braid
     """
@@ -25,6 +27,39 @@ class CanonBraid:
 
     def __repr__(self) -> str:
         return f"CanonBraid(n={self.__n}, Delta^({self.__m}, {self.__perms})"
+
+    def to_latex(self, x: int, y: int, context: list[PrimitiveObject]) -> str:
+        str_latex = ""
+        delta = Permutation(list(reversed(range(self.__n))))
+        for j in range(abs(self.__m)):
+            if self.__m < 0:
+                str_latex += delta.to_latex_helper(x, y+j, context, True)
+            else:
+                str_latex += delta.to_latex(x, y+j, context)
+            context = delta.context_out(context)
+        y += abs(self.__m)
+
+        for p in self.__perms:
+            str_latex += p.to_latex(x, y, context)
+            y += 1
+            context = p.context_out(context)
+
+        return str_latex
+
+    def latex_height(self) -> int:
+        return abs(self.__m) + len(self.__perms)
+
+    def context_out(self, context: list[PrimitiveObject]) -> list[PrimitiveObject]:
+        if abs(self.__m) % 2 == 1:
+            context = list(reversed(context))
+        
+        for p in self.__perms:
+            context = p.context_out(context)
+
+        return context
+
+
+
 
 class ProgressiveCanonBraid:
     """Less mathematical representation;

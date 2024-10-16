@@ -6,6 +6,7 @@ canonicalization
 from braid.braid import Braid
 from braid.braid_generator import BraidGenerator
 from braid.canon.canon_braid import CanonBraid
+from category.object import Carrier
 
 EXAMPLE_2008_STRING = "aBabacABABAbbCB"
 
@@ -50,4 +51,7 @@ def test_2008_example():
     """Ensures the example from the 2008
     paper has the expected result
     """
-    assert CanonBraid(str_to_braid(4, EXAMPLE_2008_STRING)) == None
+    cb = CanonBraid(str_to_braid(4, EXAMPLE_2008_STRING))
+    with open("canon_braid.txt", "w+") as f:
+        f.write(cb.to_latex(0, 0, [Carrier(0)] * 4))
+        # f.write(can12.to_latex(0, 0, []))

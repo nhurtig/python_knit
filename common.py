@@ -42,6 +42,10 @@ class Flippable(ABC): # pylint: disable=too-few-public-methods
                 Flippable
         """
 
+    @abstractmethod
+    def __str__(self) -> str:
+        pass
+
 
 class Sign(Flippable):
     """
@@ -66,6 +70,12 @@ class Sign(Flippable):
     def _to_bool(self) -> bool:
         return self.__is_pos
 
+    def __str__(self) -> str:
+        if self.pos():
+            return "pos"
+        else:
+            return "neg"
+
 class Dir(Flippable):
     """
     Used for the direction of
@@ -89,6 +99,13 @@ class Dir(Flippable):
     def _to_bool(self) -> bool:
         return self.__is_right
 
+    def __str__(self) -> str:
+        if self.right():
+            return "right"
+        else:
+            return "left"
+
+
 class Bed(Flippable):
     """
     The front and back beds of
@@ -111,3 +128,9 @@ class Bed(Flippable):
 
     def _to_bool(self) -> bool:
         return self.__is_front
+
+    def __str__(self) -> str:
+        if self.front():
+            return "front"
+        else:
+            return "back"

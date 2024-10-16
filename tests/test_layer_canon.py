@@ -41,4 +41,7 @@ def test_basic_example():
     can12 = CanonLayer(lay12)
     # can01 = CanonLayer(lay01)
     can_word = CanonWord(word)
+    with open("basic_canon.txt", "w+") as f:
+        f.write(can_word.to_latex(0, 0, []))
+        # f.write(can12.to_latex(0, 0, []))
     assert True

@@ -18,12 +18,15 @@ class PrimitiveObject(ABC):
 class Carrier(PrimitiveObject):
     def __init__(self, id: int) -> None:
         self.__id = id
-    
+
     def twist(self, is_pos: bool) -> None:
         pass
 
     def twists(self) -> int:
         return 0
+
+    def __str__(self) -> str:
+        return "c"
 
 class Loop(PrimitiveObject):
     def __init__(self, id: int) -> None:
@@ -35,3 +38,6 @@ class Loop(PrimitiveObject):
 
     def twists(self) -> int:
         return self.__twists
+
+    def __str__(self) -> str:
+        return "l"
