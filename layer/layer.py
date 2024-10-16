@@ -12,6 +12,9 @@ class Layer:
         self.__above = above
         self.__below = below
 
+    def __repr__(self) -> str:
+        return f"Layer({self.__middle}:{self.__above})"
+
     def left(self) -> int:
         return self.__left
 
@@ -123,6 +126,9 @@ class CanonLayer:
         self.__left = layer.left()
         self.__middle = layer.middle()
         self.__above = layer.layer_canon()
+
+    def __repr__(self) -> str:
+        return f"CanonLayer({self.__middle}:{self.__above})"
 
     @staticmethod
     def delta_step(layer: Layer) -> None:

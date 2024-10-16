@@ -8,6 +8,7 @@ from category.object import Carrier, Loop
 from common import Bed, Dir
 from layer.layer import CanonLayer, Layer
 from tests.test_braid import str_to_braid
+from word import CanonWord, Word
 
 b0 = str_to_braid(0, "")
 l1 = Loop(0)
@@ -30,8 +31,14 @@ lay01 = Layer(0, k01, b1, b0)
 lay12 = Layer(0, k12, b2, b1)
 lay23 = Layer(0, k23, b3, b2)
 
+word = Word()
+word.append_layer(lay01)
+word.append_layer(lay12)
+word.append_layer(lay23)
+
 def test_basic_example():
-    can23 = CanonLayer(lay23)
+    # can23 = CanonLayer(lay23)
     can12 = CanonLayer(lay12)
-    can01 = CanonLayer(lay01)
+    # can01 = CanonLayer(lay01)
+    can_word = CanonWord(word)
     assert True
