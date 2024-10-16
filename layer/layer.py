@@ -23,7 +23,7 @@ class Layer:
         for i in range(self.__above.n()):
             if i < self.__left:
                 keep.add(i)
-            elif i > self.__left + len(self.__middle.outs()):
+            elif i >= self.__left + len(self.__middle.outs()):
                 keep.add(i)
         keep.add(self.__left + self.__middle.primary_index())
 
@@ -94,21 +94,21 @@ class Layer:
         match dir.right():
             case False:
                 sign = not above
-                for j in range(i - 1, i + n):
+                for j in range(i - 1, i + n - 1):
                     self.__above.prepend(BraidGenerator(j, sign))
 
                 sign = not sign
-                for j in range(i - 1, i + m):
+                for j in range(i - 1, i + m - 1):
                     self.__below.append(BraidGenerator(j, sign))
 
                 self.__left -= 1
             case True:
                 sign = above
-                for j in range(i + n - 1, i - 2, -1):
+                for j in range(i + n - 1, i - 1, -1):
                     self.__above.prepend(BraidGenerator(j, sign))
 
                 sign = not sign
-                for j in range(i + m - 1, i - 2, -1):
+                for j in range(i + m - 1, i - 1, -1):
                     self.__below.append(BraidGenerator(j, sign))
 
                 self.__left += 1

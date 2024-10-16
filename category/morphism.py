@@ -27,8 +27,9 @@ class Knit:
     def flip(self) -> None:
         self.__ins.reverse()
         self.__outs.reverse()
-        self.__bed = self.__bed.flip()
-        self.__dir = self.__dir.flip()
+        # TODO: use flippable here.
+        self.__bed = Bed(not self.__bed.front())
+        self.__dir = Dir(not self.__dir.right())
 
     def __primary_index_pre_slurp(self) -> int:
         match (self.__bed.front(), self.__dir.right()):
@@ -49,3 +50,6 @@ class Knit:
             if o is None:
                 i -= 1
         return i
+
+    def __repr__(self) -> str:
+        return f"Knit(front={self.__bed.front()}, right={self.__dir.right()}"
