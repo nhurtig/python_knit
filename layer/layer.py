@@ -150,13 +150,20 @@ class CanonLayer(Latex):
 
     def to_latex(self, x: int, y: int, context: list[PrimitiveObject]) -> str:
         str_latex = ""
-        # Display box # TODO: make sure box knows it's responsible for displaying twists
         box_context_in = context[self.__left:self.__left+len(self.__middle.ins())]
         str_latex += self.__middle.to_latex(x+self.__left, y, box_context_in)
         box_height = self.__middle.latex_height()
-        for i in list(range(self.__left)) + list(range(self.__left+len(self.__middle.ins()), len(context))):
+        for i in range(self.__left):
+            o = context[i]
+            (r, g, b) = o.color()
             for j in range(box_height):
-                str_latex += f"\\identity{{{x+i}}}{{{y+j}}}{{{0}}}{{{context[i]}}}\n"
+                str_latex += f"\\identity{{{x+i}}}{{{y+j}}}{{{0}}}{{{o}}}{{{r}}}{{{g}}}{{{b}}}\n"
+
+        for i in range(self.__left+len(self.__middle.ins()), len(context)):
+            o = context[i]
+            (r, g, b) = o.color()
+            for j in range(box_height):
+                str_latex += f"\\identity{{{x+i}}}{{{y+j}}}{{{self.__middle.outs() - self.__middle.ins()}}}{{{o}}}{{{r}}}{{{g}}}{{{b}}}\n"
 
         str_latex += self.__above.to_latex(x, y + box_height, context[:self.__left] + self.__middle.context_out(box_context_in) + context[self.__left+len(self.__middle.ins()):])
         return str_latex

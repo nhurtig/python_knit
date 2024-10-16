@@ -36,8 +36,10 @@ class Permutation(Latex):
             lowest_to_highest = list(reversed(lowest_to_highest))
         for i in lowest_to_highest:
             strand_start = self.__perm.index(i)
-            str_latex += f"\\lineknit{{{x+strand_start}}}{{{y}}}{{{i - strand_start}}}{{{context[strand_start]}}}{{line width=\\outlineThickness*\\dx, color=white}}\n"
-            str_latex += f"\\identity{{{x+strand_start}}}{{{y}}}{{{i - strand_start}}}{{{context[strand_start]}}}\n"
+            o = context[strand_start]
+            (r, g, b) = o.color()
+            str_latex += f"\\lineknit{{{x+strand_start}}}{{{y}}}{{{i - strand_start}}}{{{o}}}{{{r}}}{{{g}}}{{{b}}}{{line width=\\outlineThickness*\\dx, color=white}}\n"
+            str_latex += f"\\identity{{{x+strand_start}}}{{{y}}}{{{i - strand_start}}}{{{o}}}{{{r}}}{{{g}}}{{{b}}}\n"
         str_latex += f"\\end{{pgfonlayer}}\n"
 
         return str_latex

@@ -18,10 +18,11 @@ class Knit(Latex):
         # TODO: change LaTeX sty file to support 6 args instead of 5
         latex_str += f"\\knit{{{self.__dir}}}{{{self.__bed}}}{{{len(self.ins())}}}{{{len(self.outs())}}}{{{x}}}{{{y}}}\n"
         for i, o in enumerate(self.outs()):
+            (r, g, b) = o.color()
             for j in range(abs(o.twists())):
-                latex_str += f"\\twist{{{'pos' if o.twists() > 0 else 'neg'}}}{{{x+i}}}{{{y+j+1}}}\n"
+                latex_str += f"\\twist{{{'pos' if o.twists() > 0 else 'neg'}}}{{{x+i}}}{{{y+j+1}}}{{{r}}}{{{g}}}{{{b}}}\n"
             for j in range(abs(o.twists()), self.__max_twists()):
-                latex_str += f"\\identity{{{x+i}}}{{{y+j+1}}}{{{0}}}{{{o}}}\n"
+                latex_str += f"\\identity{{{x+i}}}{{{y+j+1}}}{{{0}}}{{{o}}}{{{r}}}{{{g}}}{{{b}}}\n"
         return latex_str
 
     def latex_height(self) -> int:

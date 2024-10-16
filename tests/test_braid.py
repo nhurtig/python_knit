@@ -53,5 +53,8 @@ def test_2008_example():
     """
     cb = CanonBraid(str_to_braid(4, EXAMPLE_2008_STRING))
     with open("canon_braid.txt", "w+") as f:
-        f.write(cb.to_latex(0, 0, [Carrier(0)] * 4))
+        context = []
+        for _ in range(4):
+            context.append(Carrier(0))
+        f.write(cb.to_latex(0, 0, context))
         # f.write(can12.to_latex(0, 0, []))

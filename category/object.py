@@ -1,12 +1,16 @@
 from __future__ import annotations
 from enum import Enum
 from abc import ABC, abstractmethod
+from color import color_gen
 
 class PrimitiveObjectType(Enum):
     C = 0
     L = 1
 
 class PrimitiveObject(ABC):
+    def __init__(self) -> None:
+        self.__color = color_gen.get_next_color()
+
     @abstractmethod
     def twist(self, is_pos: bool) -> None:
         pass
@@ -15,8 +19,12 @@ class PrimitiveObject(ABC):
     def twists(self) -> int:
         pass
 
+    def color(self) -> tuple[int, int, int]:
+        return self.__color
+
 class Carrier(PrimitiveObject):
     def __init__(self, id: int) -> None:
+        super().__init__()
         self.__id = id
 
     def twist(self, is_pos: bool) -> None:
@@ -30,6 +38,7 @@ class Carrier(PrimitiveObject):
 
 class Loop(PrimitiveObject):
     def __init__(self, id: int) -> None:
+        super().__init__()
         self.__id = id
         self.__twists: int = 0
 
