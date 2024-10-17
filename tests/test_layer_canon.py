@@ -37,14 +37,10 @@ word.append_layer(lay12)
 word.append_layer(lay23)
 
 def test_basic_example():
-    with open("basic_word.txt", "w+") as f:
-        f.write(word.to_latex(0, 0, []))
+    word.compile_latex("word_before")
     # can23 = CanonLayer(lay23)
     # can12 = CanonLayer(lay12)
     # can01 = CanonLayer(lay01)
     can_word = CanonWord(word)
-    with open("basic_canon.txt", "w+") as f:
-        f.write(can_word.to_latex(0, 0, []))
-        can_word.compile_latex(filename="can_word")
-        # f.write(can12.to_latex(0, 0, []))
+    can_word.compile_latex(filename="can_word")
     assert True

@@ -6,3 +6,5 @@ __pycache__
 *braid*.txt
 *basic*.txt
 *.pdf
+*.aux
+*.log
