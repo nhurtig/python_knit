@@ -31,7 +31,7 @@ class Permutation(Latex):
 
         # lowest strand is the one that
         # ends up on the left
-        str_latex = f"\\begin{{pgfonlayer}}{{swaps}}\n"
+        str_latex = "\\begin{pgfonlayer}{swaps}\n"
         lowest_to_highest = list(range(self.n()))
         if inv:
             lowest_to_highest = list(reversed(lowest_to_highest))
@@ -41,7 +41,7 @@ class Permutation(Latex):
             (r, g, b) = o.color()
             str_latex += f"\\lineknit{{{x+strand_start}}}{{{y}}}{{{i - strand_start}}}{{{o}}}{{{r}}}{{{g}}}{{{b}}}{{line width=\\outlineThickness*\\dx, color=white}}\n"
             str_latex += f"\\identity{{{x+strand_start}}}{{{y}}}{{{i - strand_start}}}{{{o}}}{{{r}}}{{{g}}}{{{b}}}\n"
-        str_latex += f"\\end{{pgfonlayer}}\n"
+        str_latex += "\\end{pgfonlayer}\n"
 
         return str_latex
 

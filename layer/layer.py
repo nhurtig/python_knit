@@ -83,7 +83,7 @@ class Layer(Latex):
         self.__above.prepend(BraidGenerator(above_i, sign.pos()))
         self.__below.append(BraidGenerator(below_i, not sign.pos()))
 
-    def underline_conj(self, dir: Dir, above: bool) -> None:
+    def underline_conj(self, d: Dir, above: bool) -> None:
         """Performs the underline conj rule on either side
         of this layer's box
 
@@ -97,7 +97,7 @@ class Layer(Latex):
         n = len(self.__middle.outs())
         m = len(self.__middle.ins())
 
-        match dir.right():
+        match d.right():
             case False:
                 sign = not above
                 for j in range(i - 1, i + n - 1):

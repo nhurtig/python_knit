@@ -6,7 +6,7 @@ canonicalization
 from category.morphism import Knit
 from category.object import Carrier, Loop
 from common import Bed, Dir
-from layer.layer import CanonLayer, Layer
+from layer.layer import Layer
 from tests.test_braid import str_to_braid
 from word import CanonWord, Word
 

@@ -1,4 +1,4 @@
-from typing import Optional, Sequence
+from typing import Sequence
 from braid.braid import Braid
 from braid.braid_generator import BraidGenerator
 from category.morphism import Knit
@@ -97,7 +97,7 @@ def delta_conj() -> None:
     w.append_layer(Layer(0, Knit(Bed(True), Dir(True), [], []), b, Braid(3)))
     l = Layer(0, Knit(Bed(True), Dir(True), list(context), [Carrier(0) for _ in range(3)]), Braid(3), b)
     w.append_layer(l)
-    
+
     w.compile_latex("delta_conj_before", context)
     l.delta(Sign(True))
     w.compile_latex("delta_conj_after", context)

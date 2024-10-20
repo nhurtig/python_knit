@@ -6,16 +6,15 @@ from latex import Latex
 
 
 class Knit(Latex):
-    def __init__(self, bed: Bed, dir: Dir, ins: list[Optional[PrimitiveObject]], outs: list[Optional[PrimitiveObject]]) -> None:
+    def __init__(self, bed: Bed, d: Dir, ins: list[Optional[PrimitiveObject]], outs: list[Optional[PrimitiveObject]]) -> None:
         self.__bed = bed
-        self.__dir = dir
+        self.__dir = d
         # TODO: check this is a valid knit
         self.__ins = ins
         self.__outs = outs
 
     def to_latex(self, x: int, y: int, context: Sequence[PrimitiveObject]) -> str:
         latex_str = ""
-        # TODO: change LaTeX sty file to support 6 args instead of 5
         latex_str += f"\\knit{{{self.__dir}}}{{{self.__bed}}}{{{len(self.ins())}}}{{{len(self.outs())}}}{{{x}}}{{{y}}}\n"
         for i, o in enumerate(self.outs()):
             (r, g, b) = o.color()

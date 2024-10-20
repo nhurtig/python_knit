@@ -1,7 +1,6 @@
 from typing import Sequence
 from braid.braid import Braid
 from braid.braid_generator import BraidGenerator
-from braid.canon.canon_braid import CanonBraid
 from category.morphism import Knit
 from category.object import Carrier, Loop, PrimitiveObject
 from color import reset_colors, set_ghosting

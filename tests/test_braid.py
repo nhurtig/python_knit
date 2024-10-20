@@ -52,9 +52,4 @@ def test_2008_example() -> None:
     paper has the expected result
     """
     orig_braid = str_to_braid(4, EXAMPLE_2008_STRING)
-    context = []
-    for _ in range(4):
-        context.append(Carrier(0))
-    orig_braid.compile_latex("braid_orig", context.copy())
     cb = CanonBraid(orig_braid)
-    cb.compile_latex("canon_braid", context)

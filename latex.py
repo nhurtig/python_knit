@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 import subprocess
 import os
-from typing import Sequence
+from typing import Optional, Sequence
 from category.object import PrimitiveObject
 
 class Latex(ABC):
@@ -18,12 +18,14 @@ class Latex(ABC):
     def context_out(self, context: Sequence[PrimitiveObject]) -> Sequence[PrimitiveObject]:
         pass
 
-    def compile_latex(self, filename: str, context: Sequence[PrimitiveObject]=[], cleanup: bool=True) -> None:
+    def compile_latex(self, filename: str, context: Optional[Sequence[PrimitiveObject]]=None, cleanup: bool=True) -> None:
         """Compiles the LaTeX code from to_latex, writes it to a file, and converts it to PDF.
 
         Args:
             filename (str): The name of the file to write the LaTeX code to (without extension).
         """
+        if context is None:
+            context = []
         # Create the figs/ directory if it doesn't exist
         figs_directory = 'figs'
         os.makedirs(figs_directory, exist_ok=True)
@@ -33,7 +35,7 @@ class Latex(ABC):
 
         # Write the LaTeX code to a .tex file in the figs/ directory
         tex_filename = os.path.join(figs_directory, f"{filename}.tex")
-        with open(tex_filename, 'w') as file:
+        with open(tex_filename, 'w', encoding="utf-8") as file:
             file.write("""\\documentclass{standalone}
 \\usepackage{knit}
 \\begin{document}

@@ -304,7 +304,10 @@ class Braid(Latex):
             i = g.i()
             if i in keep:
                 if i + 1 in keep:
-                    j = len(list(filter(lambda x: x < i, keep)))
+                    j = 0
+                    for x in keep:
+                        if x < i:
+                            j += 1
                     b.append(BraidGenerator(j, g.pos()))
                 else:
                     keep.remove(i)
