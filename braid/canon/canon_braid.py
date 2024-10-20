@@ -29,9 +29,23 @@ class CanonBraid(Latex):
     def __repr__(self) -> str:
         return f"CanonBraid(n={self.__n}, Delta^({self.__m}, {self.__perms})"
 
+    def __str__(self) -> str:
+        out = ""
+        delta = Permutation.delta(self.__n)
+        for _ in range(abs(self.__m)):
+            if self.__m < 0:
+                out += str(delta)[::-1].upper()
+            else:
+                out += str(delta)
+
+        for p in self.__perms:
+            out += str(p)
+
+        return out
+
     def to_latex(self, x: int, y: int, context: Sequence[PrimitiveObject]) -> str:
         str_latex = ""
-        delta = Permutation(list(reversed(range(self.__n))))
+        delta = Permutation.delta(self.__n)
         for j in range(abs(self.__m)):
             if self.__m < 0:
                 str_latex += delta.to_latex_helper(x, y+j, context, True)
@@ -53,14 +67,11 @@ class CanonBraid(Latex):
     def context_out(self, context: Sequence[PrimitiveObject]) -> Sequence[PrimitiveObject]:
         if abs(self.__m) % 2 == 1:
             context = list(reversed(context))
-        
+
         for p in self.__perms:
             context = p.context_out(context)
 
         return context
-
-
-
 
 class ProgressiveCanonBraid:
     """Less mathematical representation;

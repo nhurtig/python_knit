@@ -23,7 +23,26 @@ class Braid(Latex):
         self.__gens: list[BraidGenerator] = []
         self.__iter_index: int = -1
 
+    @staticmethod
+    def str_to_braid(n: int, s: str) -> Braid:
+        """Constructs a braid word
+        from the string
 
+        Args:
+            n (int): Number of strands
+            s (str): Alphabetical string representing
+            characters
+
+        Returns:
+            Braid: braid word on
+            n strands described
+            by the string
+        """
+        b = Braid(n)
+        gens = [BraidGenerator.from_char(c) for c in s]
+        for g in gens:
+            b.append(g)
+        return b
 
     # def set_gens(self, gens: list[BraidGenerator]) -> None:
     #     """Sets the generators of this braid word; expects

@@ -21,6 +21,21 @@ class Permutation(Latex):
     def __init__(self, perm: list[int]) -> None:
         self.__perm: list[int] = perm
 
+    @staticmethod
+    def delta(n: int) -> Permutation:
+        return Permutation(list(reversed(range(n))))
+
+    def __str__(self) -> str:
+        out = ""
+        perms = list(self.__perm)
+        for i in reversed(range(self.n())):
+            strand_start = perms.index(i)
+            for j in range(strand_start, i):
+                out += chr(ord('a') + j)
+            perms.remove(i)
+
+        return out
+
     def to_latex(self, x: int, y: int, context: Sequence[PrimitiveObject]) -> str:
         return self.to_latex_helper(x, y, context)
 
