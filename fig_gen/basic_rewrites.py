@@ -1,3 +1,5 @@
+"""Draws examples of the axiomatic rewrite rules"""
+
 from typing import Sequence
 from braid.braid import Braid
 from braid.braid_generator import BraidGenerator
@@ -10,6 +12,8 @@ from word import Word
 
 
 def sigma_cancel() -> None:
+    """Draws two swaps canceling
+    each other out"""
     reset_colors()
     b = Braid(2)
     b.append(BraidGenerator(0, True))
@@ -24,6 +28,7 @@ def sigma_cancel() -> None:
 
 
 def yang_baxter() -> None:
+    """Draws the yang-baxter equation"""
     reset_colors()
     b = Braid(3)
     b.append(BraidGenerator(0, True))
@@ -42,6 +47,8 @@ def yang_baxter() -> None:
 
 
 def morph_swap() -> None:
+    """Draws the vertical morphism slide-past-each-other
+    move through 2 generators on 4 braids"""
     reset_colors()
     b = Braid(4)
     b.append(BraidGenerator(0, True))
@@ -58,6 +65,7 @@ def morph_swap() -> None:
 
 
 def sigma_underline() -> None:
+    """Draws an example of the sigma underline rule"""
     reset_colors()
     context: Sequence[PrimitiveObject] = [Carrier(0) for _ in range(3)]
     w = Word()
@@ -77,6 +85,7 @@ def sigma_underline() -> None:
 
 
 def sigma_conj() -> None:
+    """Draws an example of the sigma conjugation rule"""
     reset_colors()
     context = [Carrier(0) for _ in range(3)]
     w = Word()
@@ -95,6 +104,7 @@ def sigma_conj() -> None:
 
 
 def delta_conj() -> None:
+    """Draws an example of the delta conjugation rule"""
     reset_colors()
     context: Sequence[PrimitiveObject] = [Carrier(0) for _ in range(3)]
     w = Word()

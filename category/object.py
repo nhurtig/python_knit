@@ -1,35 +1,61 @@
+"""Objects are the arrows in the diagrams; carriers
+and loops. They each have colors and keep track of their
+twists"""
+
 from __future__ import annotations
-from enum import Enum
 from abc import ABC, abstractmethod
 from color import color_gen
 
 
-class PrimitiveObjectType(Enum):
-    C = 0
-    L = 1
-
-
 class PrimitiveObject(ABC):
+    """Abstract class for either a Carrier
+    or a Loop"""
+
     def __init__(self, identity: int) -> None:
         self.__id = identity
         self.__color = color_gen.get_next_color()
 
     def id(self) -> int:
+        """Getter
+
+        Returns:
+            int: ID of the object (useful
+            for modeling colors of yarn)
+        """
         return self.__id
 
     @abstractmethod
     def twist(self, is_pos: bool) -> None:
-        pass
+        """Twists this object
+
+        Args:
+            is_pos (bool): whether the twist
+            is positive or negative
+        """
 
     @abstractmethod
     def twists(self) -> int:
-        pass
+        """Returns the number of twists
+        (possibly negative) in the object
+
+        Returns:
+            int: Twist count
+        """
 
     def color(self) -> tuple[float, float, float]:
+        """Getter
+
+        Returns:
+            tuple[float, float, float]: RGB [0.0, 1.0]
+            triple
+        """
         return self.__color
 
 
 class Carrier(PrimitiveObject):
+    """Carrier yarn; a single thread. Doesn't
+    keep track of twists; is always untwisted"""
+
     def twist(self, is_pos: bool) -> None:
         pass
 
@@ -44,6 +70,9 @@ class Carrier(PrimitiveObject):
 
 
 class Loop(PrimitiveObject):
+    """Two yarns that are never separated. Keeps
+    track of twists."""
+
     def __init__(self, identity: int) -> None:
         super().__init__(identity)
         self.__twists: int = 0

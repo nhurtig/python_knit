@@ -24,6 +24,15 @@ class Permutation(Latex):
 
     @staticmethod
     def delta(n: int) -> Permutation:
+        """Generates the delta braid
+
+        Args:
+            n (int): Number of strands in
+            the delta braid
+
+        Returns:
+            Permutation: Delta braid
+        """
         return Permutation(list(reversed(range(n))))
 
     def __str__(self) -> str:
@@ -43,6 +52,18 @@ class Permutation(Latex):
     def to_latex_helper(
         self, x: int, y: int, context: Sequence[PrimitiveObject], inv: bool = False
     ) -> str:
+        """Helper for converting the Permutation
+        into LaTeX code.
+
+        Args:
+            x (int): x coordinate of lower-left corner
+            y (int): y coordinate of lower-left corner
+            context (Sequence[PrimitiveObject]): input
+            objects to this Permutation
+            inv (bool): Whether the permutation
+            should be drawn with positive (inv=False)
+            or negative (inv=True) crossings. Defaults
+            to False."""
         # draw white of lowest strand
         # draw black of lowest strand
         # repeat for all strands

@@ -1,3 +1,11 @@
+"""Words are a series of layers; they
+are words in the slurped
+braided monoidal category. CanonWords
+are specific representations of words
+that have been canonicalized. This module
+describes the algorithm to
+canonicalize a word."""
+
 from __future__ import annotations
 from typing import Sequence
 from category.object import PrimitiveObject
@@ -9,6 +17,11 @@ from layer.layer import CanonLayer, Layer
 
 
 class CanonWord(Latex):
+    """CanonWords are static representations
+    of Words that have been canonicalized.
+    They really are just a list of
+    CanonLayers."""
+
     def __init__(self, w: Word) -> None:
         self.__layers: list[CanonLayer] = []
         self.__iter_index = -1
@@ -59,6 +72,8 @@ class CanonWord(Latex):
 
 
 class Word(Latex):
+    """Words are a list of Layers."""
+
     def __init__(self) -> None:
         self.__layers: list[Layer] = []
         self.__iter_index = -1
@@ -67,6 +82,16 @@ class Word(Latex):
     # and construct the Layer from a Knit
     # and the Braid (good for building from another form)
     def append_layer(self, l: Layer) -> None:
+        """Adds a layer on top of this word,
+        mutating it in place. Currently, the
+        user is responsible for the bottom of
+        the layer to match the top of the
+        currently top layer. TODO: fix this.
+
+        Args:
+            l (Layer): Layer to be added
+            to the top/end of the word
+        """
         self.__layers.append(l)
 
     def __iter__(self) -> Word:

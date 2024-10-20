@@ -1,3 +1,7 @@
+"""Defines boxes and knits, which
+are black boxes that take some strands
+to other strands"""
+
 from __future__ import annotations
 from typing import Optional, Sequence, TypeGuard
 from category.object import Loop, PrimitiveObject
@@ -6,6 +10,10 @@ from latex import Latex
 
 
 class Knit(Latex):
+    """Represents a knit, split, or tuck. There
+    must be one loop coming out of it; otherwise
+    it would have laddered away"""
+
     def __init__(
         self,
         bed: Bed,
@@ -49,18 +57,42 @@ class Knit(Latex):
         return x is not None
 
     def outs(self) -> list[PrimitiveObject]:
+        """Computes the objects that come
+        out (on the top) of the knit
+
+        Returns:
+            list[PrimitiveObject]: Output objects
+        """
         return list(filter(Knit.__is_not_none, self.__outs))
 
     def ins(self) -> list[PrimitiveObject]:
+        """Computes the objects that come
+        in (on the bottom) the knit
+
+        Returns:
+            list[PrimitiveObject]: Input objects
+        """
         return list(filter(Knit.__is_not_none, self.__ins))
 
     def primary(self) -> Loop:
+        """Returns the primary Loop object
+        coming out of the knit
+
+        Raises:
+            ValueError: when the Knit is misconfigured
+            and the primary loop isn't a loop
+
+        Returns:
+            Loop: Primary output loop
+        """
         o = self.__outs[self.__primary_index_pre_slurp()]
         if not isinstance(o, Loop):
             raise ValueError
         return o
 
     def flip(self) -> None:
+        """Flips the knit over. Doesn't
+        twist the inputs and outputs"""
         self.__ins.reverse()
         self.__outs.reverse()
         # TODO: use flippable here.
@@ -80,6 +112,13 @@ class Knit(Latex):
         raise ValueError
 
     def primary_index(self) -> int:
+        """Returns the index of the primary
+        object in the true output objects
+        (ignoring the slurped objects)
+
+        Returns:
+            int: 0-index from left
+        """
         i = self.__primary_index_pre_slurp()
         before = self.__outs[:i]
         for o in before:

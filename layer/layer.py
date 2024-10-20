@@ -1,3 +1,9 @@
+"""Layers are a box and their braids above and below. Their
+interface exposes equivalence-preserving mutations
+like delta conjugation. This module defines the Layer
+class and how to canonicalize them into CanonLayers
+"""
+
 from typing import Sequence
 from braid.braid import Braid
 from braid.braid_generator import BraidGenerator
@@ -9,6 +15,10 @@ from latex import Latex
 
 
 class Layer(Latex):
+    """Layers are a box with a braid
+    above and below
+    """
+
     def __init__(self, left: int, middle: Knit, above: Braid, below: Braid) -> None:
         self.__left = left
         self.__middle = middle
@@ -20,12 +30,29 @@ class Layer(Latex):
         return f"Layer({self.__middle}:{self.__above})"
 
     def left(self) -> int:
+        """Getter
+
+        Returns:
+            int: Count of identity strands left of the box
+        """
         return self.__left
 
     def middle(self) -> Knit:
+        """Getter
+
+        Returns:
+            Knit: Box that the layer surrounds
+        """
         return self.__middle
 
     def macro_subbraid(self) -> Braid:
+        """Gets the macro subbraid (identity
+        braids and the primary loop) above
+        the box from this layer
+
+        Returns:
+            Braid: macro subbraid
+        """
         keep = set()
         for i in range(self.__above.n()):
             if i < self.__left:
@@ -37,9 +64,25 @@ class Layer(Latex):
         return self.__above.subbraid(keep)
 
     def primary_twists(self) -> int:
+        """Returns the number of times
+        (possibly negative) that the
+        box's primary loop has been
+        twisted
+
+        Returns:
+            int: number of times the loop
+            has been twisted
+        """
         return self.__middle.primary().twists()
 
     def delta(self, sign: Sign) -> None:
+        """Delta conjugates the box
+
+        Args:
+            sign (Sign): Sign of the
+            twist (and the delta) above
+            the box
+        """
         self.__middle.flip()
         i = self.__left
         n = len(self.__middle.outs())
@@ -121,6 +164,15 @@ class Layer(Latex):
                 self.__left += 1
 
     def layer_canon(self) -> CanonBraid:
+        """Canonicalizes the above braid
+        and returns it. Can't mutate in
+        place because canon braids and
+        non-canon braids are different.
+
+        Returns:
+            CanonBraid: Canonical form of
+            the above braid.
+        """
         return CanonBraid(self.__above)
 
     def to_latex(self, x: int, y: int, context: Sequence[PrimitiveObject]) -> str:
@@ -167,6 +219,12 @@ class Layer(Latex):
 
 
 class CanonLayer(Latex):
+    """CanonLayer is a class meant to
+    capture the canonical form of a layer.
+    It isn't meant to be mutated; it only
+    stores the above braid
+    """
+
     def __init__(self, layer: Layer) -> None:
         CanonLayer.delta_step(layer)
         CanonLayer.macro_step(layer)
@@ -179,12 +237,25 @@ class CanonLayer(Latex):
 
     @staticmethod
     def delta_step(layer: Layer) -> None:
+        """Performs the delta step of the algorithm
+        on the layer, mutating it in place
+
+        Args:
+            layer (Layer): Layer to be twisted
+        """
         while layer.primary_twists() != 0:
             sign = layer.primary_twists() < 0
             layer.delta(Sign(sign))
 
     @staticmethod
     def macro_step(layer: Layer) -> None:
+        """Performs the macro step of the algorithm
+        on the layer, mutating it in place
+
+        Args:
+            layer (Layer): Layer to be macro
+            braided
+        """
         for gen in layer.macro_subbraid():
             if gen.i() == layer.left() - 1:
                 layer.underline_conj(Dir(False), gen.pos())

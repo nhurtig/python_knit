@@ -1,3 +1,7 @@
+"""Computes and draws a small
+but complete (all rules
+represented) canonicalization"""
+
 from typing import Sequence
 from braid.braid import Braid
 from braid.braid_generator import BraidGenerator
@@ -10,6 +14,13 @@ from word import CanonWord, Word
 
 
 def init_word() -> tuple[Word, Layer, Layer, Sequence[PrimitiveObject]]:
+    """Constructs the initial word, returning it and some hooks into
+    it
+
+    Returns:
+        tuple[Word, Layer, Layer, Sequence[PrimitiveObject]]: The word,
+        its bottom and top layers, and its input context
+    """
     reset_colors(reset_ghosting=False)
     context: Sequence[PrimitiveObject] = [Carrier(0) for _ in range(4)]
     w = Word()
@@ -33,6 +44,9 @@ def init_word() -> tuple[Word, Layer, Layer, Sequence[PrimitiveObject]]:
 
 
 def display_word_steps() -> None:
+    """Displays each of the steps of the
+    words' canonicalization, using
+    ghosting to show the macro braid step"""
     (w, _, layer, context) = init_word()
     w.compile_latex("full_0", context)
 

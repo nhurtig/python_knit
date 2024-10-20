@@ -16,6 +16,8 @@ from fig_gen.full_example import display_word_steps
 
 
 def main() -> None:
+    """Executes many PDF-PNG drawing commands
+    used in the presentation"""
     sigma_cancel()
     morph_swap()
     sigma_underline()

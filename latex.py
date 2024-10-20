@@ -1,3 +1,7 @@
+"""The interface for classes that can
+be converted to tikz code and the calls
+to compile that code into a PDF and PNG"""
+
 from abc import ABC, abstractmethod
 
 import subprocess
@@ -7,19 +11,45 @@ from category.object import PrimitiveObject
 
 
 class Latex(ABC):
+    """Interface for classes that can
+    be converted to tikz"""
+
     @abstractmethod
     def to_latex(self, x: int, y: int, context: Sequence[PrimitiveObject]) -> str:
-        pass
+        """Converts this class into tikz code
+
+        Args:
+            x (int): coordinate of lower left corner
+            y (int): coordinate of lower left corner
+            context (Sequence[PrimitiveObject]): input objects
+            (strands) to this class
+
+        Returns:
+            str: tikz code
+        """
 
     @abstractmethod
     def latex_height(self) -> int:
-        pass
+        """Computes and returns the
+        height of this object in tikz
+        cells
+
+        Returns:
+            int: tikz height
+        """
 
     @abstractmethod
     def context_out(
         self, context: Sequence[PrimitiveObject]
     ) -> Sequence[PrimitiveObject]:
-        pass
+        """Given an input context, returns output context
+
+        Args:
+            context (Sequence[PrimitiveObject]): Strands coming in
+
+        Returns:
+            Sequence[PrimitiveObject]: Strands coming out
+        """
 
     def compile_latex(
         self,
@@ -27,7 +57,8 @@ class Latex(ABC):
         context: Optional[Sequence[PrimitiveObject]] = None,
         cleanup: bool = True,
     ) -> None:
-        """Compiles the LaTeX code from to_latex, writes it to a file, and converts it to PDF.
+        """Compiles the LaTeX code from to_latex, writes it to a file, and converts it to PDF
+        and PNG.
 
         Args:
             filename (str): The name of the file to write the LaTeX code to (without extension).

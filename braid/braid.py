@@ -90,6 +90,22 @@ class Braid(Latex):
         return d
 
     def left_gcd(self, other: Braid) -> Braid:
+        """Computes the left GCD of this braid
+        and the other one.
+
+        Args:
+            other (Braid): Braid to compute
+            GCD with
+
+        Raises:
+            StrandMismatchException: self and other
+            have different amount of strands
+
+        Returns:
+            Braid: Maximal braid x such that
+            there exists y such that x y = self
+            and y' such that x y' = other
+        """
         if self.n() != other.n():
             raise StrandMismatchException()
 
@@ -324,6 +340,18 @@ class Braid(Latex):
         self.__gens = [before] + self.__gens
 
     def subbraid(self, keep: set[int]) -> Braid:
+        """Computes and returns a subbraid of
+        this braid
+
+        Args:
+            keep (set[int]): 0-indices of
+            the starting strands that should
+            remain in the subbraid
+
+        Returns:
+            Braid: Subbraid on len(keep)
+            strands
+        """
         b = Braid(len(keep))
         for g in self:
             i = g.i()
