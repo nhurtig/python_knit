@@ -4,6 +4,7 @@ algorithm going on here.
 """
 
 from __future__ import annotations
+from typing import Sequence
 from category.object import PrimitiveObject
 from common import Sign
 from latex import Latex
@@ -67,7 +68,7 @@ class BraidGenerator(Latex):
             return False
         return self.i() == other.i() and self.pos() == other.pos()
 
-    def to_latex(self, x: int, y: int, context: list[PrimitiveObject]) -> str:
+    def to_latex(self, x: int, y: int, context: Sequence[PrimitiveObject]) -> str:
         str_latex = ""
 
         o_left = context[self.i()]
@@ -94,8 +95,9 @@ class BraidGenerator(Latex):
     def latex_height(self) -> int:
         return 1
 
-    def context_out(self, context: list[PrimitiveObject]) -> list[PrimitiveObject]:
-        o_left = context[self.i()]
-        context[self.i()] = context[self.i() + 1]
-        context[self.i() + 1] = o_left
-        return context
+    def context_out(self, context: Sequence[PrimitiveObject]) -> Sequence[PrimitiveObject]:
+        new_context = list(context) # shallow copy
+        o_left = new_context[self.i()]
+        new_context[self.i()] = new_context[self.i() + 1]
+        new_context[self.i() + 1] = o_left
+        return new_context

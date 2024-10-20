@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Optional
+from typing import Optional, Sequence, TypeGuard
 from category.object import Loop, PrimitiveObject
 from common import Bed, Dir
 from latex import Latex
@@ -13,7 +13,7 @@ class Knit(Latex):
         self.__ins = ins
         self.__outs = outs
 
-    def to_latex(self, x: int, y: int, context: list[PrimitiveObject]) -> str:
+    def to_latex(self, x: int, y: int, context: Sequence[PrimitiveObject]) -> str:
         latex_str = ""
         # TODO: change LaTeX sty file to support 6 args instead of 5
         latex_str += f"\\knit{{{self.__dir}}}{{{self.__bed}}}{{{len(self.ins())}}}{{{len(self.outs())}}}{{{x}}}{{{y}}}\n"
@@ -28,7 +28,7 @@ class Knit(Latex):
     def latex_height(self) -> int:
         return 1 + self.__max_twists()
 
-    def context_out(self, context: list[PrimitiveObject]) -> list[PrimitiveObject]:
+    def context_out(self, context: Sequence[PrimitiveObject]) -> list[PrimitiveObject]:
         return self.outs()
 
     def __max_twists(self) -> int:
@@ -37,11 +37,15 @@ class Knit(Latex):
             max_twists = max(max_twists, abs(o.twists()))
         return max_twists
 
+    @staticmethod
+    def __is_not_none(x: Optional[PrimitiveObject]) -> TypeGuard[PrimitiveObject]:
+        return x is not None
+
     def outs(self) -> list[PrimitiveObject]:
-        return list(filter(lambda x: x is not None, self.__outs))
+        return list(filter(Knit.__is_not_none, self.__outs))
 
     def ins(self) -> list[PrimitiveObject]:
-        return list(filter(lambda x: x is not None, self.__ins))
+        return list(filter(Knit.__is_not_none, self.__ins))
 
     def primary(self) -> Loop:
         o = self.__outs[self.__primary_index_pre_slurp()]

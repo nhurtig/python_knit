@@ -30,13 +30,13 @@ def str_to_braid(n: int, s: str) -> Braid:
         b.append(g)
     return b
 
-def test_empty_canon():
+def test_empty_canon() -> None:
     """Ensures the canonicalization of
     the empty word is the empty word
     """
     assert CanonBraid(str_to_braid(4, ""))
 
-def test_early_canon():
+def test_early_canon() -> None:
     """Ensures the canonicalization of prefixes
     of the 2008 example are correct
     """
@@ -47,7 +47,7 @@ def test_early_canon():
     # assert CanonBraid(str_to_braid(4, "aBaba")) is None
     # assert CanonBraid(str_to_braid(4, "aBabac")) is None
 
-def test_2008_example():
+def test_2008_example() -> None:
     """Ensures the example from the 2008
     paper has the expected result
     """

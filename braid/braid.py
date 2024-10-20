@@ -4,6 +4,7 @@ and canonicalization of braids
 """
 
 from __future__ import annotations
+from typing import Sequence
 from braid.braid_generator import BraidGenerator
 from category.object import PrimitiveObject
 from latex import Latex
@@ -333,7 +334,7 @@ class Braid(Latex):
             return False
         return self.n() == other.n() and list(iter(self)) == list(iter(other))
 
-    def to_latex(self, x: int, y: int, context: list[PrimitiveObject]) -> str:
+    def to_latex(self, x: int, y: int, context: Sequence[PrimitiveObject]) -> str:
         str_latex = ""
         for g in self:
             str_latex += g.to_latex(x, y, context)
@@ -342,15 +343,15 @@ class Braid(Latex):
 
         if self.__gens == []:
             for i, o in enumerate(context):
-                (r, g, b) = o.color()
-                str_latex += f"\\identity{{{x+i}}}{{{y}}}{{{0}}}{{{o}}}{{{r}}}{{{g}}}{{{b}}}\n"
+                (r, gr, b) = o.color()
+                str_latex += f"\\identity{{{x+i}}}{{{y}}}{{{0}}}{{{o}}}{{{r}}}{{{gr}}}{{{b}}}\n"
 
         return str_latex
 
     def latex_height(self) -> int:
         return max(len(list(self)), 1)
 
-    def context_out(self, context: list[PrimitiveObject]) -> list[PrimitiveObject]:
+    def context_out(self, context: Sequence[PrimitiveObject]) -> Sequence[PrimitiveObject]:
         for g in self:
             context = g.context_out(context)
 

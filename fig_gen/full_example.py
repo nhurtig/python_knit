@@ -1,3 +1,4 @@
+from typing import Sequence
 from braid.braid import Braid
 from braid.braid_generator import BraidGenerator
 from braid.canon.canon_braid import CanonBraid
@@ -8,9 +9,9 @@ from common import Bed, Dir, Sign
 from layer.layer import Layer
 from word import CanonWord, Word
 
-def init_word() -> tuple[Word, Layer, Layer, list[PrimitiveObject]]:
+def init_word() -> tuple[Word, Layer, Layer, Sequence[PrimitiveObject]]:
     reset_colors(reset_ghosting=False)
-    context = [Carrier(0) for _ in range(4)]
+    context: Sequence[PrimitiveObject] = [Carrier(0) for _ in range(4)]
     w = Word()
     b = Braid(4)
     l1 = Layer(0, Knit(Bed(True), Dir(True), [], []), b, Braid(4))
@@ -21,7 +22,7 @@ def init_word() -> tuple[Word, Layer, Layer, list[PrimitiveObject]]:
     above_braid.append(BraidGenerator(2, False))
     above_braid.append(BraidGenerator(1, False))
     above_braid.append(BraidGenerator(0, True))
-    l = Layer(0, Knit(Bed(True), Dir(True), context[:2], [loop, Carrier(0)]), above_braid, b)
+    l = Layer(0, Knit(Bed(True), Dir(True), list(context[:2]), [loop, Carrier(0)]), above_braid, b)
     w.append_layer(l)
     return (w, l1, l, context)
 

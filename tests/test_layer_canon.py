@@ -36,7 +36,7 @@ word.append_layer(lay01)
 word.append_layer(lay12)
 word.append_layer(lay23)
 
-def test_basic_example():
+def test_basic_example() -> None:
     word.compile_latex("word_before")
     # can23 = CanonLayer(lay23)
     # can12 = CanonLayer(lay12)

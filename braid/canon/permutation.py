@@ -6,6 +6,7 @@ braids
 """
 
 from __future__ import annotations
+from typing import Sequence
 from braid.braid import Braid, StrandMismatchException
 from braid.braid_generator import BraidGenerator
 from category.object import Carrier, PrimitiveObject
@@ -20,10 +21,10 @@ class Permutation(Latex):
     def __init__(self, perm: list[int]) -> None:
         self.__perm: list[int] = perm
 
-    def to_latex(self, x: int, y: int, context: list[PrimitiveObject]) -> str:
+    def to_latex(self, x: int, y: int, context: Sequence[PrimitiveObject]) -> str:
         return self.to_latex_helper(x, y, context)
 
-    def to_latex_helper(self, x: int, y: int, context: list[PrimitiveObject], inv: bool=False) -> str:
+    def to_latex_helper(self, x: int, y: int, context: Sequence[PrimitiveObject], inv: bool=False) -> str:
         # draw white of lowest strand
         # draw black of lowest strand
         # repeat for all strands
@@ -47,7 +48,7 @@ class Permutation(Latex):
     def latex_height(self) -> int:
         return 1
 
-    def context_out(self, context: list[PrimitiveObject]) -> list[PrimitiveObject]:
+    def context_out(self, context: Sequence[PrimitiveObject]) -> list[PrimitiveObject]:
         out: list[PrimitiveObject] = [Carrier(0)] * self.n()
         for i in range(self.n()):
             out[self.__perm[i]] = context[i]

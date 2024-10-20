@@ -1,3 +1,4 @@
+from typing import Sequence
 from braid.braid import Braid
 from braid.braid_generator import BraidGenerator
 from braid.canon.canon_braid import CanonBraid
@@ -121,7 +122,7 @@ class Layer(Latex):
     def layer_canon(self) -> CanonBraid:
         return CanonBraid(self.__above)
 
-    def to_latex(self, x: int, y: int, context: list[PrimitiveObject]) -> str:
+    def to_latex(self, x: int, y: int, context: Sequence[PrimitiveObject]) -> str:
         str_latex = ""
         box_context_in = context[self.__left:self.__left+len(self.__middle.ins())]
         str_latex += self.__middle.to_latex(x+self.__left, y, box_context_in)
@@ -138,15 +139,15 @@ class Layer(Latex):
             for j in range(box_height):
                 str_latex += f"\\identity{{{x+i}}}{{{y+j}}}{{{len(self.__middle.outs()) - len(self.__middle.ins())}}}{{{o}}}{{{r}}}{{{g}}}{{{b}}}\n"
 
-        str_latex += self.__above.to_latex(x, y + box_height, context[:self.__left] + self.__middle.context_out(box_context_in) + context[self.__left+len(self.__middle.ins()):])
+        str_latex += self.__above.to_latex(x, y + box_height, list(context[:self.__left]) + list(self.__middle.context_out(box_context_in)) + list(context[self.__left+len(self.__middle.ins()):]))
         return str_latex
 
     def latex_height(self) -> int:
         return self.__middle.latex_height() + self.__above.latex_height()
 
-    def context_out(self, context: list[PrimitiveObject]) -> list[PrimitiveObject]:
+    def context_out(self, context: Sequence[PrimitiveObject]) -> Sequence[PrimitiveObject]:
         box_context_in = context[self.__left:self.__left+len(self.__middle.ins())]
-        return self.__above.context_out(context[:self.__left] + self.__middle.context_out(box_context_in) + context[self.__left+len(self.__middle.ins()):])
+        return self.__above.context_out(list(context[:self.__left]) + list(self.__middle.context_out(box_context_in)) + list(context[self.__left+len(self.__middle.ins()):]))
 
 
 class CanonLayer(Latex):
@@ -176,7 +177,7 @@ class CanonLayer(Latex):
             else:
                 layer.sigma_conj(gen.i(), Sign(not gen.pos()))
 
-    def to_latex(self, x: int, y: int, context: list[PrimitiveObject]) -> str:
+    def to_latex(self, x: int, y: int, context: Sequence[PrimitiveObject]) -> str:
         str_latex = ""
         box_context_in = context[self.__left:self.__left+len(self.__middle.ins())]
         str_latex += self.__middle.to_latex(x+self.__left, y, box_context_in)
@@ -193,12 +194,12 @@ class CanonLayer(Latex):
             for j in range(box_height):
                 str_latex += f"\\identity{{{x+i}}}{{{y+j}}}{{{len(self.__middle.outs()) - len(self.__middle.ins())}}}{{{o}}}{{{r}}}{{{g}}}{{{b}}}\n"
 
-        str_latex += self.__above.to_latex(x, y + box_height, context[:self.__left] + self.__middle.context_out(box_context_in) + context[self.__left+len(self.__middle.ins()):])
+        str_latex += self.__above.to_latex(x, y + box_height, list(context[:self.__left]) + list(self.__middle.context_out(box_context_in)) + list(context[self.__left+len(self.__middle.ins()):]))
         return str_latex
 
     def latex_height(self) -> int:
         return self.__middle.latex_height() + self.__above.latex_height()
 
-    def context_out(self, context: list[PrimitiveObject]) -> list[PrimitiveObject]:
+    def context_out(self, context: Sequence[PrimitiveObject]) -> Sequence[PrimitiveObject]:
         box_context_in = context[self.__left:self.__left+len(self.__middle.ins())]
-        return self.__above.context_out(context[:self.__left] + self.__middle.context_out(box_context_in) + context[self.__left+len(self.__middle.ins()):])
+        return self.__above.context_out(list(context[:self.__left]) + list(self.__middle.context_out(box_context_in)) + list(context[self.__left+len(self.__middle.ins()):]))

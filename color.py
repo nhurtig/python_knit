@@ -6,7 +6,7 @@ import colorsys
 class ColorGenerator:
     def __init__(self) -> None:
         self.hue = 0.0  # Initial hue value
-        self.ghosting = []
+        self.ghostingBadName: list[int] = []
         self.index = 0
         self.golden_ratio_conjugate = 0.61803398875  # Approximate value of the golden ratio conjugate
 
@@ -29,7 +29,7 @@ class ColorGenerator:
 
 color_gen = ColorGenerator()
 
-def reset_colors(reset_ghosting: bool=True):
+def reset_colors(reset_ghosting: bool=True) -> None:
     color_gen.reset()
     if reset_ghosting:
         set_ghosting([])

@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Sequence
 from category.object import PrimitiveObject
 from latex import Latex
 from layer.layer import CanonLayer, Layer
@@ -35,7 +36,7 @@ class CanonWord(Latex):
             return False
         return list(iter(self)) == list(iter(other))
 
-    def to_latex(self, x: int, y: int, context: list[PrimitiveObject]) -> str:
+    def to_latex(self, x: int, y: int, context: Sequence[PrimitiveObject]) -> str:
         latex_str = ""
         for l in self:
             latex_str += l.to_latex(x, y, context)
@@ -49,7 +50,7 @@ class CanonWord(Latex):
             h += l.latex_height()
         return h
 
-    def context_out(self, context: list[PrimitiveObject]) -> list[PrimitiveObject]:
+    def context_out(self, context: Sequence[PrimitiveObject]) -> Sequence[PrimitiveObject]:
         # TODO: implement
         raise NotImplementedError
 
@@ -83,7 +84,7 @@ class Word(Latex):
             return False
         return list(iter(self)) == list(iter(other))
 
-    def to_latex(self, x: int, y: int, context: list[PrimitiveObject]) -> str:
+    def to_latex(self, x: int, y: int, context: Sequence[PrimitiveObject]) -> str:
         latex_str = ""
         for l in self:
             latex_str += l.to_latex(x, y, context)
@@ -97,6 +98,6 @@ class Word(Latex):
             h += l.latex_height()
         return h
 
-    def context_out(self, context: list[PrimitiveObject]) -> list[PrimitiveObject]:
+    def context_out(self, context: Sequence[PrimitiveObject]) -> Sequence[PrimitiveObject]:
         # TODO: implement
         raise NotImplementedError

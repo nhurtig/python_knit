@@ -2,11 +2,12 @@ from abc import ABC, abstractmethod
 
 import subprocess
 import os
+from typing import Sequence
 from category.object import PrimitiveObject
 
 class Latex(ABC):
     @abstractmethod
-    def to_latex(self, x: int, y: int, context: list[PrimitiveObject]) -> str:
+    def to_latex(self, x: int, y: int, context: Sequence[PrimitiveObject]) -> str:
         pass
 
     @abstractmethod
@@ -14,10 +15,10 @@ class Latex(ABC):
         pass
 
     @abstractmethod
-    def context_out(self, context: list[PrimitiveObject]) -> list[PrimitiveObject]:
+    def context_out(self, context: Sequence[PrimitiveObject]) -> Sequence[PrimitiveObject]:
         pass
 
-    def compile_latex(self, filename: str, context=[], cleanup=True) -> None:
+    def compile_latex(self, filename: str, context: Sequence[PrimitiveObject]=[], cleanup: bool=True) -> None:
         """Compiles the LaTeX code from to_latex, writes it to a file, and converts it to PDF.
 
         Args:

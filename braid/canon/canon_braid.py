@@ -6,6 +6,7 @@ Delta braids and permutations
 """
 
 from __future__ import annotations
+from typing import Sequence
 from braid.braid import Braid
 from braid.braid_generator import BraidGenerator
 from braid.canon.permutation import Permutation
@@ -28,7 +29,7 @@ class CanonBraid(Latex):
     def __repr__(self) -> str:
         return f"CanonBraid(n={self.__n}, Delta^({self.__m}, {self.__perms})"
 
-    def to_latex(self, x: int, y: int, context: list[PrimitiveObject]) -> str:
+    def to_latex(self, x: int, y: int, context: Sequence[PrimitiveObject]) -> str:
         str_latex = ""
         delta = Permutation(list(reversed(range(self.__n))))
         for j in range(abs(self.__m)):
@@ -49,7 +50,7 @@ class CanonBraid(Latex):
     def latex_height(self) -> int:
         return abs(self.__m) + len(self.__perms)
 
-    def context_out(self, context: list[PrimitiveObject]) -> list[PrimitiveObject]:
+    def context_out(self, context: Sequence[PrimitiveObject]) -> Sequence[PrimitiveObject]:
         if abs(self.__m) % 2 == 1:
             context = list(reversed(context))
         
