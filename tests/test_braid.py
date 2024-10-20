@@ -4,12 +4,9 @@ canonicalization
 """
 
 from braid.braid import Braid
-from braid.braid_generator import BraidGenerator
 from braid.canon.canon_braid import CanonBraid
 
 EXAMPLE_2008_STRING = "aBabacABABAbbCB"
-
-
 
 def test_early_canon() -> None:
     """Ensures the canonicalization of prefixes

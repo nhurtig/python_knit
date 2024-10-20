@@ -8,8 +8,12 @@ class PrimitiveObjectType(Enum):
     L = 1
 
 class PrimitiveObject(ABC):
-    def __init__(self) -> None:
+    def __init__(self, identity: int) -> None:
+        self.__id = identity
         self.__color = color_gen.get_next_color()
+
+    def id(self) -> int:
+        return self.__id
 
     @abstractmethod
     def twist(self, is_pos: bool) -> None:
@@ -23,10 +27,6 @@ class PrimitiveObject(ABC):
         return self.__color
 
 class Carrier(PrimitiveObject):
-    def __init__(self, id: int) -> None:
-        super().__init__()
-        self.__id = id
-
     def twist(self, is_pos: bool) -> None:
         pass
 
@@ -36,10 +36,12 @@ class Carrier(PrimitiveObject):
     def __str__(self) -> str:
         return "c"
 
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, Carrier) and self.__id == other.id()
+
 class Loop(PrimitiveObject):
-    def __init__(self, id: int) -> None:
-        super().__init__()
-        self.__id = id
+    def __init__(self, identity: int) -> None:
+        super().__init__(identity)
         self.__twists: int = 0
 
     def twist(self, is_pos: bool) -> None:

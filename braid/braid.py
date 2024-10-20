@@ -91,14 +91,9 @@ class Braid(Latex):
         if self.n() != other.n():
             raise StrandMismatchException()
 
-        gcd = Braid(self.n())
-        for g in self.__left_gcd_helper(other, 0):
-            gcd.append(g)
+        gcd = Braid(self.__n)
 
-        return gcd
-
-    def __left_gcd_helper(self, other: Braid, i0: int) -> list[BraidGenerator]:
-        for i in range(i0, self.n() - 1):
+        for i in range(self.n() - 1):
             g1 = Braid(self.n())
             g1.append(BraidGenerator(i, False))
             g1.concat(self)
@@ -117,8 +112,13 @@ class Braid(Latex):
             if len(list(leftovers)) != 0:
                 continue
 
-            return [BraidGenerator(i, True)] + self_quotient.__left_gcd_helper(other_quotient, 0)
-        return []
+            sub_gcd = self_quotient.left_gcd(other_quotient)
+            gcd.append(BraidGenerator(i, True))
+            for g in sub_gcd:
+                gcd.append(g)
+            return gcd
+
+        return gcd
 
     def head(self) -> Braid:
         """Computes the head, or
