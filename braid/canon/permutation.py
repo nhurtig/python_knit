@@ -12,6 +12,7 @@ from braid.braid_generator import BraidGenerator
 from category.object import Carrier, PrimitiveObject
 from latex import Latex
 
+
 class Permutation(Latex):
     """
     A permutation is a bijective
@@ -31,7 +32,7 @@ class Permutation(Latex):
         for i in reversed(range(self.n())):
             strand_start = perms.index(i)
             for j in range(strand_start, i):
-                out += chr(ord('a') + j)
+                out += chr(ord("a") + j)
             perms.remove(i)
 
         return out
@@ -39,7 +40,9 @@ class Permutation(Latex):
     def to_latex(self, x: int, y: int, context: Sequence[PrimitiveObject]) -> str:
         return self.to_latex_helper(x, y, context)
 
-    def to_latex_helper(self, x: int, y: int, context: Sequence[PrimitiveObject], inv: bool=False) -> str:
+    def to_latex_helper(
+        self, x: int, y: int, context: Sequence[PrimitiveObject], inv: bool = False
+    ) -> str:
         # draw white of lowest strand
         # draw black of lowest strand
         # repeat for all strands
@@ -54,8 +57,10 @@ class Permutation(Latex):
             strand_start = self.__perm.index(i)
             o = context[strand_start]
             (r, g, b) = o.color()
-            str_latex += f"\\lineknit{{{x+strand_start}}}{{{y}}}{{{i - strand_start}}}{{{o}}}{{{r}}}{{{g}}}{{{b}}}{{line width=\\outlineThickness*\\dx, color=white}}\n"
-            str_latex += f"\\identity{{{x+strand_start}}}{{{y}}}{{{i - strand_start}}}{{{o}}}{{{r}}}{{{g}}}{{{b}}}\n"
+            str_latex += f"""\\lineknit{{{x+strand_start}}}{{{y}}}
+{{{o}}}{{{r}}}{{{g}}}{{{b}}}{{line width=\\outlineThickness*\\dx, color=white}}\n"""
+            str_latex += f"""\\identity{{{x+strand_start}}}{{{y}}}
+{{{o}}}{{{r}}}{{{g}}}{{{b}}}\n"""
         str_latex += "\\end{pgfonlayer}\n"
 
         return str_latex

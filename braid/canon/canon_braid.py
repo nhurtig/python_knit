@@ -13,6 +13,7 @@ from braid.canon.permutation import Permutation
 from category.object import PrimitiveObject
 from latex import Latex
 
+
 class CanonBraid(Latex):
     """Mathematical representation of a
     greedy normal form braid
@@ -48,9 +49,9 @@ class CanonBraid(Latex):
         delta = Permutation.delta(self.__n)
         for j in range(abs(self.__m)):
             if self.__m < 0:
-                str_latex += delta.to_latex_helper(x, y+j, context, True)
+                str_latex += delta.to_latex_helper(x, y + j, context, True)
             else:
-                str_latex += delta.to_latex(x, y+j, context)
+                str_latex += delta.to_latex(x, y + j, context)
             context = delta.context_out(context)
         y += abs(self.__m)
 
@@ -64,7 +65,9 @@ class CanonBraid(Latex):
     def latex_height(self) -> int:
         return abs(self.__m) + len(self.__perms)
 
-    def context_out(self, context: Sequence[PrimitiveObject]) -> Sequence[PrimitiveObject]:
+    def context_out(
+        self, context: Sequence[PrimitiveObject]
+    ) -> Sequence[PrimitiveObject]:
         if abs(self.__m) % 2 == 1:
             context = list(reversed(context))
 
@@ -72,6 +75,7 @@ class CanonBraid(Latex):
             context = p.context_out(context)
 
         return context
+
 
 class ProgressiveCanonBraid:
     """Less mathematical representation;
@@ -133,7 +137,11 @@ class ProgressiveCanonBraid:
                 # and see if something interesting happens?
                 # Success would be v' \neq v and fail
                 # is v' == v, I think
-                s_prime = Permutation(u_prime.simple_perm()).right_divisor(su_perm).to_simple()
+                s_prime = (
+                    Permutation(u_prime.simple_perm())
+                    .right_divisor(su_perm)
+                    .to_simple()
+                )
             else:
                 # C-tile
                 # Calculate s' = u / s (left complement)
@@ -186,7 +194,7 @@ class ProgressiveCanonBraid:
         return self
 
     def __next__(self) -> Braid:
-        if self.__iter_index  >= len(self.__ss):
+        if self.__iter_index >= len(self.__ss):
             raise StopIteration
         s = self.__ss[self.__iter_index]
         self.__iter_index += 1

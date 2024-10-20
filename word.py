@@ -7,6 +7,7 @@ from layer.layer import CanonLayer, Layer
 # TODO: allow words to alternate
 # braids and knits in wacky ways.
 
+
 class CanonWord(Latex):
     def __init__(self, w: Word) -> None:
         self.__layers: list[CanonLayer] = []
@@ -50,9 +51,12 @@ class CanonWord(Latex):
             h += l.latex_height()
         return h
 
-    def context_out(self, context: Sequence[PrimitiveObject]) -> Sequence[PrimitiveObject]:
+    def context_out(
+        self, context: Sequence[PrimitiveObject]
+    ) -> Sequence[PrimitiveObject]:
         # TODO: implement
         raise NotImplementedError
+
 
 class Word(Latex):
     def __init__(self) -> None:
@@ -98,6 +102,8 @@ class Word(Latex):
             h += l.latex_height()
         return h
 
-    def context_out(self, context: Sequence[PrimitiveObject]) -> Sequence[PrimitiveObject]:
+    def context_out(
+        self, context: Sequence[PrimitiveObject]
+    ) -> Sequence[PrimitiveObject]:
         # TODO: implement
         raise NotImplementedError

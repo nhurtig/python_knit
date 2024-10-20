@@ -3,9 +3,11 @@ from enum import Enum
 from abc import ABC, abstractmethod
 from color import color_gen
 
+
 class PrimitiveObjectType(Enum):
     C = 0
     L = 1
+
 
 class PrimitiveObject(ABC):
     def __init__(self, identity: int) -> None:
@@ -26,6 +28,7 @@ class PrimitiveObject(ABC):
     def color(self) -> tuple[float, float, float]:
         return self.__color
 
+
 class Carrier(PrimitiveObject):
     def twist(self, is_pos: bool) -> None:
         pass
@@ -38,6 +41,7 @@ class Carrier(PrimitiveObject):
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, Carrier) and self.__id == other.id()
+
 
 class Loop(PrimitiveObject):
     def __init__(self, identity: int) -> None:

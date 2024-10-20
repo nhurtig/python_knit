@@ -8,6 +8,7 @@ from common import Bed, Dir, Sign
 from layer.layer import Layer
 from word import Word
 
+
 def sigma_cancel() -> None:
     reset_colors()
     b = Braid(2)
@@ -39,6 +40,7 @@ def yang_baxter() -> None:
     context = [Carrier(0) for _ in range(3)]
     b.compile_latex("yangbaxter_after", context)
 
+
 def morph_swap() -> None:
     reset_colors()
     b = Braid(4)
@@ -53,6 +55,7 @@ def morph_swap() -> None:
     b.append(BraidGenerator(0, True))
     context = [Carrier(0) for _ in range(4)]
     b.compile_latex("morph_swap_after", context)
+
 
 def sigma_underline() -> None:
     reset_colors()
@@ -72,6 +75,7 @@ def sigma_underline() -> None:
 
     w.compile_latex("sigma_underline_after", context)
 
+
 def sigma_conj() -> None:
     reset_colors()
     context = [Carrier(0) for _ in range(3)]
@@ -89,13 +93,19 @@ def sigma_conj() -> None:
 
     w.compile_latex("sigma_conj_after", context)
 
+
 def delta_conj() -> None:
     reset_colors()
     context: Sequence[PrimitiveObject] = [Carrier(0) for _ in range(3)]
     w = Word()
     b = Braid(3)
     w.append_layer(Layer(0, Knit(Bed(True), Dir(True), [], []), b, Braid(3)))
-    l = Layer(0, Knit(Bed(True), Dir(True), list(context), [Carrier(0) for _ in range(3)]), Braid(3), b)
+    l = Layer(
+        0,
+        Knit(Bed(True), Dir(True), list(context), [Carrier(0) for _ in range(3)]),
+        Braid(3),
+        b,
+    )
     w.append_layer(l)
 
     w.compile_latex("delta_conj_before", context)

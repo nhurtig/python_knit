@@ -6,12 +6,14 @@ Sign and Bed and Dir
 from __future__ import annotations
 from abc import ABC, abstractmethod
 
-class Flippable(ABC): # pylint: disable=too-few-public-methods
+
+class Flippable(ABC):  # pylint: disable=too-few-public-methods
     """
     Abstract class that represents
     objects that are really just
     booleans
     """
+
     def flip(self) -> Flippable:
         """Flips the object
 
@@ -52,6 +54,7 @@ class Sign(Flippable):
     Used for morphisms that
     have inverses
     """
+
     def __init__(self, is_pos: bool) -> None:
         self.__is_pos = is_pos
 
@@ -76,11 +79,13 @@ class Sign(Flippable):
         else:
             return "neg"
 
+
 class Dir(Flippable):
     """
     Used for the direction of
     the carrier strand in a knit
     """
+
     def __init__(self, is_right: bool) -> None:
         self.__is_right = is_right
 
@@ -111,6 +116,7 @@ class Bed(Flippable):
     The front and back beds of
     a v-bed knitting machine
     """
+
     def __init__(self, is_front: bool) -> None:
         self.__is_front = is_front
 

@@ -6,7 +6,13 @@ from latex import Latex
 
 
 class Knit(Latex):
-    def __init__(self, bed: Bed, d: Dir, ins: list[Optional[PrimitiveObject]], outs: list[Optional[PrimitiveObject]]) -> None:
+    def __init__(
+        self,
+        bed: Bed,
+        d: Dir,
+        ins: list[Optional[PrimitiveObject]],
+        outs: list[Optional[PrimitiveObject]],
+    ) -> None:
         self.__bed = bed
         self.__dir = d
         # TODO: check this is a valid knit
@@ -15,11 +21,13 @@ class Knit(Latex):
 
     def to_latex(self, x: int, y: int, context: Sequence[PrimitiveObject]) -> str:
         latex_str = ""
-        latex_str += f"\\knit{{{self.__dir}}}{{{self.__bed}}}{{{len(self.ins())}}}{{{len(self.outs())}}}{{{x}}}{{{y}}}\n"
+        latex_str += f"""\\knit{{{self.__dir}}}{{{self.__bed}}}
+{{{len(self.ins())}}}{{{len(self.outs())}}}{{{x}}}{{{y}}}\n"""
         for i, o in enumerate(self.outs()):
             (r, g, b) = o.color()
             for j in range(abs(o.twists())):
-                latex_str += f"\\twist{{{'pos' if o.twists() > 0 else 'neg'}}}{{{x+i}}}{{{y+j+1}}}{{{r}}}{{{g}}}{{{b}}}\n"
+                latex_str += f"""\\twist{{{'pos' if o.twists() > 0 else 'neg'}}}
+{{{x+i}}}{{{y+j+1}}}{{{r}}}{{{g}}}{{{b}}}\n"""
             for j in range(abs(o.twists()), self.__max_twists()):
                 latex_str += f"\\identity{{{x+i}}}{{{y+j+1}}}{{{0}}}{{{o}}}{{{r}}}{{{g}}}{{{b}}}\n"
         return latex_str

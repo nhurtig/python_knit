@@ -9,6 +9,7 @@ from braid.braid_generator import BraidGenerator
 from category.object import PrimitiveObject
 from latex import Latex
 
+
 class Braid(Latex):
     """
     Represents a word in the braid
@@ -18,6 +19,7 @@ class Braid(Latex):
     it has and complains loudly if
     a generator doesn't match up.
     """
+
     def __init__(self, n: int) -> None:
         self.__n = n
         self.__gens: list[BraidGenerator] = []
@@ -68,7 +70,7 @@ class Braid(Latex):
         return self.__n
 
     @staticmethod
-    def delta(n: int, pos: bool=True) -> Braid:
+    def delta(n: int, pos: bool = True) -> Braid:
         """Constructs the delta braid
         on n strands
 
@@ -81,7 +83,7 @@ class Braid(Latex):
             Braid: Delta braid
         """
         d = Braid(n)
-        for i in range(n-1, -1, -1):
+        for i in range(n - 1, -1, -1):
             # strand 0 to index i
             for j in range(i):
                 d.append(BraidGenerator(j, pos))
@@ -168,17 +170,17 @@ class Braid(Latex):
             x is all pos, y is all neg, and x * y
             is the original
         """
-        for (gen_index, g1) in enumerate(self):
+        for gen_index, g1 in enumerate(self):
             if gen_index + 1 == len(self.__gens):
                 continue
-            g2 = self.__gens[gen_index+1]
+            g2 = self.__gens[gen_index + 1]
             if not g1.pos() and g2.pos():
                 i = g1.i()
                 j = g2.i()
 
                 prefix = self.__gens[:gen_index]
                 middle = Braid.reverse_helper(i, j)
-                suffix = self.__gens[gen_index + 2:]
+                suffix = self.__gens[gen_index + 2 :]
 
                 self.__gens = prefix + middle + suffix
                 self.reverse()
@@ -214,7 +216,7 @@ class Braid(Latex):
         self.reverse_gens()
         self.invert_gens()
 
-    def simple_perm(self, ignore: bool=False) -> list[int]:
+    def simple_perm(self, ignore: bool = False) -> list[int]:
         """Converts to a permutation.
         Raises NotSimpleError if
         this list doesn't represent a permutation
@@ -270,8 +272,12 @@ class Braid(Latex):
             case 0:
                 return []
             case 1:
-                return [BraidGenerator(j, True), BraidGenerator(i, True),
-                        BraidGenerator(j, False), BraidGenerator(i, False)]
+                return [
+                    BraidGenerator(j, True),
+                    BraidGenerator(i, True),
+                    BraidGenerator(j, False),
+                    BraidGenerator(i, False),
+                ]
             case _:
                 return [BraidGenerator(j, True), BraidGenerator(i, False)]
 
@@ -330,7 +336,7 @@ class Braid(Latex):
                     b.append(BraidGenerator(j, g.pos()))
                 else:
                     keep.remove(i)
-                    keep.add(i+1)
+                    keep.add(i + 1)
             else:
                 if i + 1 in keep:
                     keep.remove(i + 1)
@@ -366,14 +372,18 @@ class Braid(Latex):
         if self.__gens == []:
             for i, o in enumerate(context):
                 (r, gr, b) = o.color()
-                str_latex += f"\\identity{{{x+i}}}{{{y}}}{{{0}}}{{{o}}}{{{r}}}{{{gr}}}{{{b}}}\n"
+                str_latex += (
+                    f"\\identity{{{x+i}}}{{{y}}}{{{0}}}{{{o}}}{{{r}}}{{{gr}}}{{{b}}}\n"
+                )
 
         return str_latex
 
     def latex_height(self) -> int:
         return max(len(list(self)), 1)
 
-    def context_out(self, context: Sequence[PrimitiveObject]) -> Sequence[PrimitiveObject]:
+    def context_out(
+        self, context: Sequence[PrimitiveObject]
+    ) -> Sequence[PrimitiveObject]:
         for g in self:
             context = g.context_out(context)
 
@@ -387,6 +397,7 @@ class StrandMismatchException(Exception):
     together
     """
 
+
 class GeneratorOutOfBoundsException(Exception):
     """
     Raised when a generator is attempted to be
@@ -394,12 +405,15 @@ class GeneratorOutOfBoundsException(Exception):
     doesn't fit
     """
 
+
 class WordNotEmptyException(Exception):
     """
     Raised when a braid word was supposed
     to be empty but wasn't (setting a
     word's generators)
     """
+
+
 class NotSimpleError(Exception):
     """
     Raised whenever a braid was expected

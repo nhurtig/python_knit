@@ -8,6 +8,7 @@ from common import Bed, Dir, Sign
 from layer.layer import Layer
 from word import CanonWord, Word
 
+
 def init_word() -> tuple[Word, Layer, Layer, Sequence[PrimitiveObject]]:
     reset_colors(reset_ghosting=False)
     context: Sequence[PrimitiveObject] = [Carrier(0) for _ in range(4)]
@@ -21,9 +22,15 @@ def init_word() -> tuple[Word, Layer, Layer, Sequence[PrimitiveObject]]:
     above_braid.append(BraidGenerator(2, False))
     above_braid.append(BraidGenerator(1, False))
     above_braid.append(BraidGenerator(0, True))
-    l = Layer(0, Knit(Bed(True), Dir(True), list(context[:2]), [loop, Carrier(0)]), above_braid, b)
+    l = Layer(
+        0,
+        Knit(Bed(True), Dir(True), list(context[:2]), [loop, Carrier(0)]),
+        above_braid,
+        b,
+    )
     w.append_layer(l)
     return (w, l1, l, context)
+
 
 def display_word_steps() -> None:
     (w, _, layer, context) = init_word()
