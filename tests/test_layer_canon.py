@@ -1,14 +1,12 @@
-"""
-Tests for layer
-canonicalization
-"""
+"""Tests for layer
+canonicalization"""
 
 from braid.braid import Braid
 from category.morphism import Knit
 from category.object import Carrier, Loop
-from common import Bed, Dir
+from common.common import Bed, Dir
 from layer.layer import Layer
-from word import CanonWord, Word
+from src.layer.word import CanonWord, Word
 
 b0 = Braid.str_to_braid(0, "")
 l1 = Loop(0)

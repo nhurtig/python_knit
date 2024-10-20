@@ -5,10 +5,10 @@ from braid.braid import Braid
 from braid.braid_generator import BraidGenerator
 from category.morphism import Knit
 from category.object import Carrier, PrimitiveObject
-from color import reset_colors
-from common import Bed, Dir, Sign
+from fig_gen.color import reset_colors
+from common.common import Bed, Dir, Sign
 from layer.layer import Layer
-from word import Word
+from layer.word import Word
 
 
 def sigma_cancel() -> None:

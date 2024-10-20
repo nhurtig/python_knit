@@ -5,10 +5,10 @@ from typing import Sequence
 from braid.braid import Braid
 from category.morphism import Knit
 from category.object import Carrier, Loop, PrimitiveObject
-from color import reset_colors
-from common import Bed, Dir, Sign
+from fig_gen.color import reset_colors
+from common.common import Bed, Dir, Sign
 from layer.layer import Layer
-from word import Word
+from layer.word import Word
 
 
 def word_basic() -> tuple[Word, Layer, Sequence[PrimitiveObject]]:

@@ -7,10 +7,10 @@ from braid.braid import Braid
 from braid.braid_generator import BraidGenerator
 from category.morphism import Knit
 from category.object import Carrier, Loop, PrimitiveObject
-from color import reset_colors, set_ghosting
-from common import Bed, Dir, Sign
+from fig_gen.color import reset_colors, set_ghosting
+from common.common import Bed, Dir, Sign
 from layer.layer import Layer
-from word import CanonWord, Word
+from layer.word import CanonWord, Word
 
 
 def init_word() -> tuple[Word, Layer, Layer, Sequence[PrimitiveObject]]:

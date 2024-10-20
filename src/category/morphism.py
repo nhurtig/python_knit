@@ -5,8 +5,8 @@ to other strands"""
 from __future__ import annotations
 from typing import Optional, Sequence, TypeGuard
 from category.object import Loop, PrimitiveObject
-from common import Bed, Dir
-from latex import Latex
+from common.common import Bed, Dir
+from fig_gen.latex import Latex
 
 
 class Knit(Latex):

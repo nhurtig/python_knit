@@ -10,7 +10,7 @@ from typing import Sequence
 from braid.braid import Braid, StrandMismatchException
 from braid.braid_generator import BraidGenerator
 from category.object import Carrier, PrimitiveObject
-from latex import Latex
+from fig_gen.latex import Latex
 
 
 class Permutation(Latex):

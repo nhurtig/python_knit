@@ -9,7 +9,7 @@ canonicalize a word."""
 from __future__ import annotations
 from typing import Sequence
 from category.object import PrimitiveObject
-from latex import Latex
+from fig_gen.latex import Latex
 from layer.layer import CanonLayer, Layer
 
 # TODO: allow words to alternate

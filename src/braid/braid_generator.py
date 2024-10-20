@@ -6,8 +6,8 @@ algorithm going on here.
 from __future__ import annotations
 from typing import Sequence
 from category.object import PrimitiveObject
-from common import Sign
-from latex import Latex
+from common.common import Sign
+from fig_gen.latex import Latex
 
 
 class BraidGenerator(Latex):

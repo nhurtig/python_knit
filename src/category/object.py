@@ -4,7 +4,7 @@ twists"""
 
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from color import color_gen
+from fig_gen.color import color_gen
 
 
 class PrimitiveObject(ABC):

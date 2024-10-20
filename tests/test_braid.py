@@ -1,7 +1,6 @@
-"""
-Tests for braid word
-canonicalization
-"""
+"""Tests braid word
+canonicalization using an example
+from the 2008 paper"""
 
 from braid.braid import Braid
 from braid.canon.canon_braid import CanonBraid

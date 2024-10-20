@@ -10,8 +10,8 @@ from braid.braid_generator import BraidGenerator
 from braid.canon.canon_braid import CanonBraid
 from category.morphism import Knit
 from category.object import PrimitiveObject
-from common import Dir, Sign
-from latex import Latex
+from common.common import Dir, Sign
+from fig_gen.latex import Latex
 
 
 class Layer(Latex):

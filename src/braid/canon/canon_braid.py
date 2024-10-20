@@ -11,7 +11,7 @@ from braid.braid import Braid
 from braid.braid_generator import BraidGenerator
 from braid.canon.permutation import Permutation
 from category.object import PrimitiveObject
-from latex import Latex
+from fig_gen.latex import Latex
 
 
 class CanonBraid(Latex):

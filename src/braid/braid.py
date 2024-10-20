@@ -7,7 +7,7 @@ from __future__ import annotations
 from typing import Sequence
 from braid.braid_generator import BraidGenerator
 from category.object import PrimitiveObject
-from latex import Latex
+from fig_gen.latex import Latex
 
 
 class Braid(Latex):
