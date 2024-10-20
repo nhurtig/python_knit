@@ -3,6 +3,9 @@ from category.object import PrimitiveObject
 from latex import Latex
 from layer.layer import CanonLayer, Layer
 
+# TODO: allow words to alternate
+# braids and knits in wacky ways.
+
 class CanonWord(Latex):
     def __init__(self, w: Word) -> None:
         self.__layers: list[CanonLayer] = []
@@ -33,7 +36,6 @@ class CanonWord(Latex):
         return list(iter(self)) == list(iter(other))
 
     def to_latex(self, x: int, y: int, context: list[PrimitiveObject]) -> str:
-        assert context == []
         latex_str = ""
         for l in self:
             latex_str += l.to_latex(x, y, context)
@@ -82,7 +84,6 @@ class Word(Latex):
         return list(iter(self)) == list(iter(other))
 
     def to_latex(self, x: int, y: int, context: list[PrimitiveObject]) -> str:
-        assert context == []
         latex_str = ""
         for l in self:
             latex_str += l.to_latex(x, y, context)

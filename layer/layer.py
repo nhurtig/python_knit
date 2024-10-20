@@ -41,16 +41,16 @@ class Layer(Latex):
         self.__middle.flip()
         i = self.__left
         n = len(self.__middle.outs())
-        for j in range(i, i+n):
+        for j in range(n):
             o = self.__middle.outs()[j]
             o.twist(sign.pos())
         for j in range(i, i + n):
             # take strand i to index j
-            for k in range(i, j):
+            for k in range(j-1, i-1, -1):
                 self.__above.prepend(BraidGenerator(k, sign.pos()))
 
         m = len(self.__middle.ins())
-        for j in range(i, i+m):
+        for j in range(m):
             o = self.__middle.ins()[j]
             o.twist(not sign.pos())
         for j in range(i + m - 1, i - 1, -1):

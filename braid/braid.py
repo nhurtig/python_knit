@@ -340,10 +340,15 @@ class Braid(Latex):
             y += g.latex_height()
             context = g.context_out(context)
 
+        if self.__gens == []:
+            for i, o in enumerate(context):
+                (r, g, b) = o.color()
+                str_latex += f"\\identity{{{x+i}}}{{{y}}}{{{0}}}{{{o}}}{{{r}}}{{{g}}}{{{b}}}\n"
+
         return str_latex
 
     def latex_height(self) -> int:
-        return len(list(self))
+        return max(len(list(self)), 1)
 
     def context_out(self, context: list[PrimitiveObject]) -> list[PrimitiveObject]:
         for g in self:

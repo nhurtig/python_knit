@@ -111,14 +111,37 @@
 
 % Knit shape (direction, bed, num in, num out, x, y)
 \newcommand{\knit}[6]{
-\begin{pgfonlayer}{boxes}
-    \draw [line width=\knitThickness*\dx]
-    (#5*\dx,#6*\dy) -- (#5*\dx+#3*\dx,#6*\dy) -- (#5*\dx+#4*\dx,#6*\dy+\dy)
-    -- (#5*\dx,#6*\dy+\dy) -- (#5*\dx,#6*\dy) -- (#5*\dx+#3*\dx,#6*\dy)
-    -- (#5*\dx+#4*\dx,#6*\dy+\dy);
-    \node[anchor=west] at (#5*\dx,#6*\dy+0.5*\dy) {\knitlabel{#1}{#2}};
-\end{pgfonlayer}
+    \ifnum#3=0 \ifnum#4=0
+        % Do nothing if num in == 0 and num out == 0
+    \else
+        \begin{pgfonlayer}{boxes}
+            \draw [line width=\knitThickness*\dx]
+            (#5*\dx,#6*\dy) -- (#5*\dx+#3*\dx,#6*\dy) -- (#5*\dx+#4*\dx,#6*\dy+\dy)
+            -- (#5*\dx,#6*\dy+\dy) -- (#5*\dx,#6*\dy) -- (#5*\dx+#3*\dx,#6*\dy)
+            -- (#5*\dx+#4*\dx,#6*\dy+\dy);
+            \node[anchor=west] at (#5*\dx,#6*\dy+0.5*\dy) {\knitlabel{#1}{#2}};
+        \end{pgfonlayer}
+    \fi \else
+        \begin{pgfonlayer}{boxes}
+            \draw [line width=\knitThickness*\dx]
+            (#5*\dx,#6*\dy) -- (#5*\dx+#3*\dx,#6*\dy) -- (#5*\dx+#4*\dx,#6*\dy+\dy)
+            -- (#5*\dx,#6*\dy+\dy) -- (#5*\dx,#6*\dy) -- (#5*\dx+#3*\dx,#6*\dy)
+            -- (#5*\dx+#4*\dx,#6*\dy+\dy);
+            \node[anchor=west] at (#5*\dx,#6*\dy+0.5*\dy) {\knitlabel{#1}{#2}};
+        \end{pgfonlayer}
+    \fi
 }
+
+% \newcommand{\knit}[6]{
+% \ifnum#3=0 \ifnum#4=0
+% \begin{pgfonlayer}{boxes}
+%     \draw [line width=\knitThickness*\dx]
+%     (#5*\dx,#6*\dy) -- (#5*\dx+#3*\dx,#6*\dy) -- (#5*\dx+#4*\dx,#6*\dy+\dy)
+%     -- (#5*\dx,#6*\dy+\dy) -- (#5*\dx,#6*\dy) -- (#5*\dx+#3*\dx,#6*\dy)
+%     -- (#5*\dx+#4*\dx,#6*\dy+\dy);
+%     \node[anchor=west] at (#5*\dx,#6*\dy+0.5*\dy) {\knitlabel{#1}{#2}};
+% \end{pgfonlayer}
+% }
 
 % Knit label (direction, bed)
 \newcommand{\knitlabel}[2]{%
