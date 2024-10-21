@@ -3,6 +3,8 @@ __pycache__
 .vscode/*
 .venv
 
+*.egg-info
+
 *braid*.txt
 *basic*.txt
 *.pdf
