@@ -69,7 +69,9 @@ def test_word_canonicalization_fuzzing() -> None:
                 # Create a mutant of the original braid by fuzzing it
                 mutant = original.copy()
                 mutant.fuzz(
-                    random.random, LAYER_MUTATIONS_PER_LAYER, BRAID_MUTATIONS_PER_BRAID
+                    random.random,
+                    LAYER_MUTATIONS_PER_LAYER,
+                    BRAID_MUTATIONS_PER_BRAID,
                 )
 
                 # Check that the canonical forms of the original and mutant are equivalent
