@@ -28,3 +28,13 @@ def test_2008_example() -> None:
     orig_braid = Braid.str_to_braid(4, EXAMPLE_2008_STRING)
     cb = CanonBraid(orig_braid)
     assert str(cb) == "ABACBAABACBAcaabcbbcbaa"
+
+
+def test_identity_identity() -> None:
+    """This catches a real bug that occured when
+    an identity ended up being pushed to the root of
+    a progressive canon braid, and it recorded the
+    identity instead of throwing it away"""
+    b = Braid.str_to_braid(2, "aaAA")
+    cb = CanonBraid(b)
+    assert cb == CanonBraid(Braid(2))

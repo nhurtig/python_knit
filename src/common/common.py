@@ -79,6 +79,11 @@ class Sign(Flippable):
         else:
             return "neg"
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Sign):
+            return False
+        return self.pos() == other.pos()
+
 
 class Dir(Flippable):
     """
@@ -109,6 +114,11 @@ class Dir(Flippable):
             return "right"
         return "left"
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Dir):
+            return False
+        return self.right() == other.right()
+
 
 class Bed(Flippable):
     """
@@ -138,3 +148,8 @@ class Bed(Flippable):
         if self.front():
             return "front"
         return "back"
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Bed):
+            return False
+        return self.front() == other.front()

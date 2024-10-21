@@ -219,13 +219,16 @@ class ProgressiveCanonBraid:
                 self.__m += 1
                 self.__ss = s_primes
             else:
-                self.__ss = [u] + s_primes
+                if not p.is_identity():
+                    self.__ss = [u] + s_primes
         else:
             if p.is_identity():
                 self.__ss = s_primes
             else:
                 self.__m -= 1
-                self.__ss = [p.left_divisor().to_simple()] + s_primes
+                p_left_div = p.left_divisor()
+                if not p_left_div.is_identity():
+                    self.__ss = [p_left_div.to_simple()] + s_primes
 
     def __iter__(self) -> ProgressiveCanonBraid:
         self.__iter_index = 0

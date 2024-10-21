@@ -11,8 +11,8 @@ MAX_N = 10
 WORDS_PER_N = 10
 LETTERS_PER_WORD = 10
 MUTANTS_PER_WORD = 10
-MUTATION_ATTEMPTS_PER_WORD = 10
-# Took 3 minutes with the above settings
+MUTATION_ATTEMPTS_PER_WORD = 100
+# Took 208 seconds with the above settings
 
 print(
     f"{len(range(MIN_N, MAX_N+1))*WORDS_PER_N*MUTANTS_PER_WORD} tests, each with {MUTATION_ATTEMPTS_PER_WORD} calls to mutate {LETTERS_PER_WORD} letters"
@@ -33,10 +33,11 @@ def random_braid_word(n: int, length: int) -> Braid:
         Braid: Random braid word
     """
     word = Braid(n)
-    for _ in range(length):
-        i = int(rng() * (n - 1))  # generator index
-        pos = rng() < 0.5
-        word.append(BraidGenerator(i, pos))
+    if n >= 2:
+        for _ in range(length):
+            i = int(rng() * (n - 1))  # generator index
+            pos = rng() < 0.5
+            word.append(BraidGenerator(i, pos))
     return word
 
 

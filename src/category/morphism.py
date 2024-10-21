@@ -27,6 +27,41 @@ class Knit(Latex):
         self.__ins = ins
         self.__outs = outs
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Knit):
+            return False
+        # TODO: ins, outs shouldn't be used for this. Should consider slurpables too
+        return (
+            self.bed() == other.bed()
+            and self.dir() == other.dir()
+            and self.ins() == other.ins()
+            and self.outs() == other.outs()
+        )
+
+    def bed(self) -> Bed:
+        """Getter
+
+        Returns:
+            Bed: Knit's bed
+        """
+        return self.__bed
+
+    def dir(self) -> Dir:
+        """Getter
+
+        Returns:
+            Dir: Knit's dir
+        """
+        return self.__dir
+
+    def copy(self) -> Knit:
+        """Copies this Knit
+
+        Returns:
+            Knit: A copy of the Knit
+        """
+        return Knit(self.__bed, self.__dir, self.__ins.copy(), self.__outs.copy())
+
     def to_latex(self, x: int, y: int, context: Sequence[PrimitiveObject]) -> str:
         latex_str = ""
         latex_str += f"""\\knit{{{self.__dir}}}{{{self.__bed}}}

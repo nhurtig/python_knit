@@ -4,7 +4,8 @@ like delta conjugation. This module defines the Layer
 class and how to canonicalize them into CanonLayers
 """
 
-from typing import Sequence
+from __future__ import annotations
+from typing import Callable, Sequence
 from braid.braid import Braid
 from braid.braid_generator import BraidGenerator
 from braid.canon.canon_braid import CanonBraid
@@ -26,8 +27,25 @@ class Layer(Latex):
         self.__above = above
         self.__below = below
 
+    def copy(self, below: Braid) -> tuple[Layer, Braid]:
+        """Copies the layer. Takes the below braid
+        of the copied layer and returns the copy of
+        the above braid. This is so Words can have their
+        Layers share braids.
+
+        Args:
+            below (Braid): Already-copied below braid
+
+        Returns:
+            tuple[Layer, Braid]: Copied layer, that layers'
+            above braid
+        """
+        above_copy = self.__above.copy()
+        l = Layer(self.left(), self.middle().copy(), above_copy, below)
+        return (l, above_copy)
+
     def __repr__(self) -> str:
-        return f"Layer({self.__middle}:{self.__above})"
+        return f"Layer({repr(self.__middle)}:{repr(self.__above)})"
 
     def left(self) -> int:
         """Getter
@@ -62,6 +80,14 @@ class Layer(Latex):
         keep.add(self.__left + self.__middle.primary_index())
 
         return self.__above.subbraid(keep)
+
+    def below(self) -> Braid:
+        """Getter of a copy
+
+        Returns:
+            Braid: Copy of below braid
+        """
+        return self.__below.copy()
 
     def primary_twists(self) -> int:
         """Returns the number of times
@@ -175,6 +201,48 @@ class Layer(Latex):
         """
         return CanonBraid(self.__above)
 
+    def fuzz_layer(self, rng: Callable[[], float], steps: int) -> None:
+        """Fuzzes this layer by performing layer operations; doesn't
+        fuzz either braid
+
+        Args:
+            rng (Callable[[], float]): Random number generator
+            steps (int): Number of mutations to attempt
+        """
+        num_macro_strands = self.__below.n() - len(self.__middle.ins()) + 1
+        for _ in range(steps):
+            r = rng()
+            if r < 0.2:
+                # sigma conj
+                i = int(rng() * (num_macro_strands - 1))
+                if i in [self.__left, self.__left - 1]:
+                    continue  # can't sigma conj here
+                self.sigma_conj(i, Sign(rng() < 0.5))
+            elif r < 0.6:
+                # underline conj
+                right = rng() < 0.5
+                # Boundary conditions
+                if not right:
+                    if self.__left == 0:
+                        continue
+                else:
+                    if self.__left + len(self.__middle.ins()) == self.__below.n():
+                        continue
+
+                self.underline_conj(Dir(right), rng() < 0.5)
+            else:
+                # delta conj
+                self.delta(Sign(rng() < 0.5))
+
+    def fuzz_braid(self, rng: Callable[[], float], steps: int) -> None:
+        """Fuzzes the above braid using its fuzzing algorithm
+
+        Args:
+            rng (Callable[[], float]): Random number generator
+            steps (int): Number of mutations
+        """
+        self.__above.fuzz(rng, steps)
+
     def to_latex(self, x: int, y: int, context: Sequence[PrimitiveObject]) -> str:
         str_latex = ""
         box_context_in = context[self.__left : self.__left + len(self.__middle.ins())]
@@ -231,6 +299,42 @@ class CanonLayer(Latex):
         self.__left = layer.left()
         self.__middle = layer.middle()
         self.__above = layer.layer_canon()
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, CanonLayer):
+            return False
+        return (
+            self.left() == other.left()
+            and self.middle() == other.middle()
+            and self.above() == other.above()
+        )
+
+    def left(self) -> int:
+        """Getter
+
+        Returns:
+            int: Number of identity strands to the
+            left of this layers' box
+        """
+        return self.__left
+
+    def middle(self) -> Knit:
+        """Getter
+
+        Returns:
+            Knit: Box in the middle of this
+            layer
+        """
+        return self.__middle
+
+    def above(self) -> CanonBraid:
+        """Getter
+
+        Returns:
+            CanonBraid: Braid on the top of
+            this layer
+        """
+        return self.__above
 
     def __repr__(self) -> str:
         return f"CanonLayer({repr(self.__middle)}:{repr(self.__above)})"

@@ -7,7 +7,8 @@ describes the algorithm to
 canonicalize a word."""
 
 from __future__ import annotations
-from typing import Sequence
+from typing import Callable, Sequence
+from braid.braid import Braid
 from category.object import PrimitiveObject
 from fig_gen.latex import Latex
 from layer.layer import CanonLayer, Layer
@@ -48,6 +49,12 @@ class CanonWord(Latex):
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, CanonWord):
             return False
+        slist = list(iter(self))
+        olist = list(iter(other))
+        for i, x in enumerate(slist):
+            y = olist[i]
+            if x != y:
+                return False
         return list(iter(self)) == list(iter(other))
 
     def __str__(self) -> str:
@@ -80,6 +87,42 @@ class Word(Latex):
     def __init__(self) -> None:
         self.__layers: list[Layer] = []
         self.__iter_index = -1
+
+    def copy(self) -> Word:
+        """Copies the word and
+        its layers. The bottom braid
+        must have n=0.
+
+        Returns:
+            Word: Not-shallow
+            copy
+        """
+        w = Word()
+        layers = list(self)
+        if layers:
+            prev_b = layers[0].below()
+            for l in layers:
+                (l_copy, new_b) = l.copy(prev_b)
+                w.append_layer(l_copy)
+                prev_b = new_b
+        return w
+
+    def fuzz(self, rng: Callable[[], float], layer_muts: int, braid_muts: int) -> None:
+        """Fuzzes the word in place. Executes layer_muts layer mutations
+        at each layer, then braid_muts braid mutations at each
+        layer
+
+        Args:
+            rng (Callable[[], float]): Random number generator
+            layer_muts (int): Number of layer mutations at
+            each layer
+            braid_muts (int): Number of braid word mutations at
+            each layer
+        """
+        for l in self:
+            l.fuzz_layer(rng, layer_muts)
+        for l in self:
+            l.fuzz_braid(rng, braid_muts)
 
     # TODO: keep track of the above braid
     # and construct the Layer from a Knit
