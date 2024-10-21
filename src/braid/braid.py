@@ -197,20 +197,27 @@ class Braid(Latex):
             x is all pos, y is all neg, and x * y
             is the original
         """
-        for gen_index, g1 in enumerate(self):
-            if gen_index + 1 == len(self.__gens):
-                continue
-            g2 = self.__gens[gen_index + 1]
-            if not g1.pos() and g2.pos():
-                i = g1.i()
-                j = g2.i()
+        while True:
+            for gen_index, g1 in enumerate(self):
+                if gen_index + 1 == len(self.__gens):
+                    continue
+                g2 = self.__gens[gen_index + 1]
+                if not g1.pos() and g2.pos():
+                    i = g1.i()
+                    j = g2.i()
 
-                prefix = self.__gens[:gen_index]
-                middle = Braid.reverse_helper(i, j)
-                suffix = self.__gens[gen_index + 2 :]
+                    prefix = self.__gens[:gen_index]
+                    middle = Braid.reverse_helper(i, j)
+                    suffix = self.__gens[gen_index + 2 :]
 
-                self.__gens = prefix + middle + suffix
-                self.reverse()
+                    self.__gens = prefix + middle + suffix
+                    break  # break the for loop, doesn't
+                    # go to else, while True makes
+                    # this go to next loop
+            else:
+                # for wasn't broken; no swaps
+                # were made
+                break  # break the while True
 
         leading_pos = Braid(self.n())
         ending_neg = Braid(self.n())
