@@ -4,7 +4,7 @@ and canonicalization of braids
 """
 
 from __future__ import annotations
-from typing import Sequence
+from typing import Callable, Sequence
 from braid.braid_generator import BraidGenerator
 from category.object import PrimitiveObject
 from fig_gen.latex import Latex
@@ -24,6 +24,17 @@ class Braid(Latex):
         self.__n = n
         self.__gens: list[BraidGenerator] = []
         self.__iter_index: int = -1
+
+    def copy(self) -> Braid:
+        """Returns a copy of this braid.
+
+        Returns:
+            Braid: Copy
+        """
+        b = Braid(self.n())
+        for gen in self:
+            b.append(gen)
+        return b
 
     @staticmethod
     def str_to_braid(n: int, s: str) -> Braid:
@@ -370,6 +381,62 @@ class Braid(Latex):
                     keep.remove(i + 1)
                     keep.add(i)
         return b
+
+    def fuzz(self, rng: Callable[[], float], steps: int) -> None:
+        """Fuzzes the braid word by applying a series
+        of rewrite rules, preserving its equivalence but
+        changing ts generators.
+
+        Args:
+            rng (Callable[[], float]): Random number generator
+            steps (int): Number of rewrite rules to apply
+        """
+        for _ in range(steps):
+            if not self.__gens:
+                continue
+
+            # Select a random index in the list of generators
+            i = int(rng() * len(self.__gens))
+
+            # Apply a random braid relation at this index
+            self.__fuzz_index(i, rng)
+
+    def __fuzz_index(self, i: int, rng: Callable[[], float]) -> None:
+        """Attempts to apply a braid word equivalence at this
+        index. If none work, has a chance to uncancel a pair
+        at this index.
+
+        Args:
+            i (int): 0-index in the braid word's length
+            rng (Callable[[], float]): Random number generator
+        """
+        if not 0 < i < len(self.__gens) - 1:
+            return
+        g1 = self.__gens[i - 1]
+        g2 = self.__gens[i]
+        g3 = self.__gens[i + 1]
+
+        # Yang-baxter?
+        if (
+            g1.i() == g3.i()
+            and abs(g1.i() - g2.i()) == 1
+            and g1.pos() == g2.pos() == g3.pos()
+        ):
+            self.__gens[i - 1 : i + 2] = [g2, g1, g2]
+        # Cancel?
+        elif g1.i() == g2.i() and g1.pos() != g2.pos():
+            # Remove both generators
+            del self.__gens[i - 1 : i + 1]
+        # Swap?
+        elif abs(g1.i() - g2.i()) >= 2:
+            self.__gens[i - 1 : i + 1] = [g2, g1]
+        else:
+            # Uncancel?
+            if rng() < 0.3:
+                j = int(rng() * (self.n() - 1))
+                first_inv = rng() < 0.5
+                self.__gens.insert(i, BraidGenerator(j, first_inv))
+                self.__gens.insert(i, BraidGenerator(j, not first_inv))
 
     def __iter__(self) -> Braid:
         self.__iter_index = 0

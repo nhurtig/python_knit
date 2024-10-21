@@ -23,9 +23,19 @@ class CanonBraid(Latex):
         intermediate = ProgressiveCanonBraid(b)
         self.__m = intermediate.m()
         self.__n = intermediate.n()
+        self.__iter_index = -1
         self.__perms: list[Permutation] = []
         for simple_braid in intermediate:
             self.__perms.append(Permutation(simple_braid.simple_perm()))
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, CanonBraid):
+            return False
+        return (
+            self.n() == other.n()
+            and self.m() == other.m()
+            and list(self) == list(other)
+        )
 
     def __repr__(self) -> str:
         return f"CanonBraid(n={self.__n}, Delta^({self.__m}, {self.__perms})"
@@ -43,6 +53,34 @@ class CanonBraid(Latex):
             out += str(p)
 
         return out
+
+    def __iter__(self) -> CanonBraid:
+        self.__iter_index = 0
+        return self
+
+    def __next__(self) -> Permutation:
+        if self.__iter_index >= len(self.__perms):
+            raise StopIteration
+        next_perm = self.__perms[self.__iter_index]
+        self.__iter_index += 1
+        return next_perm
+
+    def n(self) -> int:
+        """Getter
+
+        Returns:
+            int: Number of strands
+        """
+        return self.__n
+
+    def m(self) -> int:
+        """Getter
+
+        Returns:
+            int: Number of leading positive deltas
+            (possibly negative)
+        """
+        return self.__m
 
     def to_latex(self, x: int, y: int, context: Sequence[PrimitiveObject]) -> str:
         str_latex = ""

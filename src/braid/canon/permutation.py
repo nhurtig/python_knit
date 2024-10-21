@@ -21,6 +21,23 @@ class Permutation(Latex):
 
     def __init__(self, perm: list[int]) -> None:
         self.__perm: list[int] = perm
+        self.__iter_index = -1
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Permutation):
+            return False
+        return list(self) == list(other)
+
+    def __iter__(self) -> Permutation:
+        self.__iter_index = 0
+        return self
+
+    def __next__(self) -> int:
+        if self.__iter_index >= len(self.__perm):
+            raise StopIteration
+        next_int = self.__perm[self.__iter_index]
+        self.__iter_index += 1
+        return next_int
 
     @staticmethod
     def delta(n: int) -> Permutation:
