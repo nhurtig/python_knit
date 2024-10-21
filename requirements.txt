@@ -14,7 +14,8 @@ platformdirs==4.3.6
 pluggy==1.5.0
 pylint==3.3.1
 pytest==8.3.3
--e git+ssh://git@github.com/nhurtig/python-knit.git@0dc33ffe060fce661a6f463239a8eef126aec61f#egg=python_knit
+-e git+ssh://git@github.com/nhurtig/python-knit.git@da15252b387c98f21d8f701f6a94af53ca530fef#egg=python_knit
 setuptools==75.2.0
 tomlkit==0.13.2
+types-setuptools==75.2.0.20241019
 typing_extensions==4.12.2
