@@ -44,6 +44,13 @@ def test_big_reversal() -> None:
     """Tests that a huge reversal doesn't proc
     RecursionError; a previous implementation
     did"""
-    lst = "A, b, c, d, e, f, g, h, i, j, k, b, c, d, e, f, g, h, i, j, b, c, d, e, f, g, h, i, b, c, d, e, f, g, h, b, c, d, e, f, g, b, c, d, e, f, a, b, c, d, e, a, b, c, d, a, b, c, a, b, a, a, b, a, c, b, a, d, c, b, a, e, d, c, b, a, f, e, d, c, b, g, f, e, d, c, b, a, h, g, f, e, d, c, b, a, i, h, g, f, e, d, c, b, a, j, i, h, g, f, e, d, c, b, a, k, j, i, h, g, f, e, d, c, b, a"
+    lst = (
+        "A, b, c, d, e, f, g, h, i, j, k, b, c, d, e, f, g, h, i, j, b, c, "
+        "d, e, f, g, h, i, b, c, d, e, f, g, h, b, c, d, e, f, g, b, c, d, "
+        "e, f, a, b, c, d, e, a, b, c, d, a, b, c, a, b, a, a, b, a, c, b, "
+        "a, d, c, b, a, e, d, c, b, a, f, e, d, c, b, g, f, e, d, c, b, a, "
+        "h, g, f, e, d, c, b, a, i, h, g, f, e, d, c, b, a, j, i, h, g, f, "
+        "e, d, c, b, a, k, j, i, h, g, f, e, d, c, b, a"
+    )
     big_braid = Braid.str_to_braid(12, "".join(lst.split(", ")))
     big_braid.reverse()

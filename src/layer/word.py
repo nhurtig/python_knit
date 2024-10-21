@@ -8,7 +8,6 @@ canonicalize a word."""
 
 from __future__ import annotations
 from typing import Callable, Sequence
-from braid.braid import Braid
 from category.object import PrimitiveObject
 from fig_gen.latex import Latex
 from layer.layer import CanonLayer, Layer
