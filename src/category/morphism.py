@@ -127,7 +127,9 @@ class Knit(Latex):
         return i
 
     def __repr__(self) -> str:
-        return f"Knit(front={repr(self.__bed.front())}, right={repr(self.__dir.right())}"
+        return (
+            f"Knit(front={repr(self.__bed.front())}, right={repr(self.__dir.right())}"
+        )
 
     def __str__(self) -> str:
         return f"""[{", ".join(["slurped" if o is None else str(o) for o in self.__outs])}]

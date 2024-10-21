@@ -40,7 +40,9 @@ def test_basic_example() -> None:
     of a small word (3 layers) is correct"""
     can_word = CanonWord(word)
     out = str(can_word)
-    assert out == """\taab
+    assert (
+        out
+        == """\taab
 [slurped, c, l]
 back left
 [l, c]
@@ -52,3 +54,4 @@ back right
 [c, l]
 back left
 [slurped]"""
+    )
