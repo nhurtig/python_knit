@@ -233,7 +233,10 @@ class CanonLayer(Latex):
         self.__above = layer.layer_canon()
 
     def __repr__(self) -> str:
-        return f"CanonLayer({self.__middle}:{self.__above})"
+        return f"CanonLayer({repr(self.__middle)}:{repr(self.__above)})"
+
+    def __str__(self) -> str:
+        return f"\t{self.__above}\n{self.__middle}"
 
     @staticmethod
     def delta_step(layer: Layer) -> None:

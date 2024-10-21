@@ -50,6 +50,9 @@ class CanonWord(Latex):
             return False
         return list(iter(self)) == list(iter(other))
 
+    def __str__(self) -> str:
+        return "\n".join([str(layer) for layer in reversed(list(self))])
+
     def to_latex(self, x: int, y: int, context: Sequence[PrimitiveObject]) -> str:
         latex_str = ""
         for l in self:

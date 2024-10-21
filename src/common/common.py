@@ -107,8 +107,7 @@ class Dir(Flippable):
     def __str__(self) -> str:
         if self.right():
             return "right"
-        else:
-            return "left"
+        return "left"
 
 
 class Bed(Flippable):
@@ -138,5 +137,4 @@ class Bed(Flippable):
     def __str__(self) -> str:
         if self.front():
             return "front"
-        else:
-            return "back"
+        return "back"

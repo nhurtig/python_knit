@@ -36,10 +36,19 @@ word.append_layer(lay23)
 
 
 def test_basic_example() -> None:
-    word.compile_latex("word_before")
-    # can23 = CanonLayer(lay23)
-    # can12 = CanonLayer(lay12)
-    # can01 = CanonLayer(lay01)
+    """Checks that the canonicalization
+    of a small word (3 layers) is correct"""
     can_word = CanonWord(word)
-    can_word.compile_latex(filename="can_word")
-    assert True
+    out = str(can_word)
+    assert out == """\taab
+[slurped, c, l]
+back left
+[l, c]
+\tABAABAaabba
+[l, l, c]
+back right
+[c, l]
+\t
+[c, l]
+back left
+[slurped]"""
