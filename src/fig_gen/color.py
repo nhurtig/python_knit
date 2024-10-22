@@ -4,20 +4,16 @@ tikz figures"""
 from __future__ import annotations
 import colorsys
 
+COLOR_OFFSET: float = 0
 
-# TODO: instead of golden ratio,
-# use binary chunking or something
+# van der corput sequence
 class ColorGenerator:
     """Generator that emits a series
     of colors over its lifetime"""
 
     def __init__(self) -> None:
-        self.__hue = 0.0  # Initial hue value
         self.__ghosting: list[int] = []
         self.__index = 0
-        self.__golden_ratio_conjugate = (
-            0.61803398875  # Approximate value of the golden ratio conjugate
-        )
 
     def get_next_color(self) -> tuple[float, float, float]:
         """Returns the next color in RGB [0.0, 1.0] format
@@ -26,21 +22,29 @@ class ColorGenerator:
             tuple[float, float, float]: RGB triple
         """
         # Increment hue by the golden ratio
-        self.__hue += self.__golden_ratio_conjugate
-        self.__hue %= 1.0  # Ensure hue wraps around between 0 and 1
+        hue = self.__van_der_corput(self.__index) + COLOR_OFFSET
 
         # Convert HSL to RGB
         r, g, b = colorsys.hls_to_rgb(
-            self.__hue, 0.95 if self.__index in self.__ghosting else 0.35, 1.0
+            hue, 0.95 if self.__index in self.__ghosting else 0.35, 1.0
         )  # Lightness is 0.5 for good visibility, Saturation is 0.9
         self.__index += 1
         return (r, g, b)
+
+    @staticmethod
+    def __van_der_corput(i: int, base: int=2) -> float:
+        result = 0.0
+        fraction = 1 / base
+        while i > 0:
+            result += (i % base) * fraction
+            i //= base
+            fraction /= base
+        return result
 
     def reset(self) -> None:
         """Resets the state of this generator
         so the first color is next. Does not
         change the ghosting"""
-        self.__hue = 0.0
         self.__index = 0
 
     def set_ghosting(self, g: list[int]) -> None:
