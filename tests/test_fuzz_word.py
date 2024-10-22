@@ -1,8 +1,7 @@
-"""Tests word canonicalization
-using fuzzing"""
+"""Tests word canonicalization using fuzzing"""
 
 import random
-from concurrent.futures import FIRST_EXCEPTION, ThreadPoolExecutor, wait
+from concurrent.futures import FIRST_EXCEPTION, ProcessPoolExecutor, wait
 
 from braid.braid import Braid
 from category.morphism import Knit
@@ -29,7 +28,8 @@ TEST_OUT_INFO = "word_fuzz_out.txt"
 TEST_ERROR_INFO = "word_fuzz_err.txt"
 UPDATE_FREQ = (MAX_BOXES + 1 - MIN_BOXES) * WORDS_PER_NUM_BOXES * MUTANTS_PER_WORD
 THREADS = 4
-BASE_SEED = 5000
+# Took 177 seconds for bastion
+BASE_SEED = 7000
 
 
 def random_word(num_boxes: int, rng: random.Random) -> Word:
@@ -79,7 +79,7 @@ def fuzz_word_canonicalization(seed: int, thread_id: int) -> None:
                 original_canon = CanonWord(original.copy())
 
                 for _ in range(MUTANTS_PER_WORD):
-                    # Create a mutant of the original braid by fuzzing it
+                    # Create a mutant
                     mutant = original.copy()
                     mutant.fuzz(
                         rng.random,
@@ -87,7 +87,7 @@ def fuzz_word_canonicalization(seed: int, thread_id: int) -> None:
                         BRAID_MUTATIONS_PER_BRAID,
                     )
 
-                    # Check that the canonical forms of the original and mutant are equivalent
+                    # Chech canon forms are equal
                     mutant_canon = CanonWord(mutant)
                     if original_canon != mutant_canon:
                         with open(TEST_ERROR_INFO, "a+", encoding="utf-8") as f:
@@ -98,10 +98,9 @@ def fuzz_word_canonicalization(seed: int, thread_id: int) -> None:
                             f.write(repr(mutant_canon))
                             f.write(str(mutant_canon))
                             f.write("\n")
-                        assert original_canon == mutant_canon, (
-                            f"Thread {thread_id}: Word mismatch after fuzzing"
-                            "for num_boxes={num_boxes}"
-                        )
+                        assert (
+                            original_canon == mutant_canon
+                        ), f"Process {thread_id}: mismatch: {original_canon}, {mutant_canon}"
                     tests += 1
 
                     if tests % UPDATE_FREQ == 0:
@@ -109,22 +108,24 @@ def fuzz_word_canonicalization(seed: int, thread_id: int) -> None:
                             seed += THREADS
                             rng = random.Random(seed)
                             f.write(
-                                f"Thread {thread_id}: tested {tests} words so far, seed {seed}\n"
+                                f"Process {thread_id}: tested {tests} words so far, seed {seed}\n"
                             )
 
 
 def test_word_canonicalization_fuzzing_multithreaded() -> None:
-    """Tests word canonicalization by fuzzing across multiple threads."""
+    """Tests word canonicalization by fuzzing across multiple processes."""
     seeds = [BASE_SEED + i for i in range(THREADS)]
+
     with open(TEST_OUT_INFO, "w+", encoding="utf-8") as _:
         pass
-    with ThreadPoolExecutor(max_workers=THREADS) as executor:
+
+    with ProcessPoolExecutor(max_workers=THREADS) as executor:
         futures = [
             executor.submit(fuzz_word_canonicalization, seed, i)
             for i, seed in enumerate(seeds)
         ]
 
-        # Wait for the first exception to occur or all threads to finish
+        # Wait for the first exception to occur or all processes to finish
         done, _ = wait(futures, return_when=FIRST_EXCEPTION)
 
         for future in done:
