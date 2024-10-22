@@ -96,7 +96,7 @@ class Permutation(Latex):
             o = context[strand_start]
             (r, g, b) = o.color()
             str_latex += f"""\\lineknit{{{x+strand_start}}}{{{y}}}{{{i - strand_start}}}
-{{{o}}}{{{r}}}{{{g}}}{{{b}}}{{line width=\\outlineThickness*\\dx, color=white}}\n"""
+{{{o}}}{{{r}}}{{{g}}}{{{b}}}{{line width=\\outlineThickness*\\dx, color=white}}{{0}}\n"""
             str_latex += f"""\\identity{{{x+strand_start}}}{{{y}}}{{{i - strand_start}}}
 {{{o}}}{{{r}}}{{{g}}}{{{b}}}\n"""
         str_latex += "\\end{pgfonlayer}\n"

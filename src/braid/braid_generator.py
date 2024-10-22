@@ -82,14 +82,14 @@ class BraidGenerator(Latex):
             str_latex += f"""\\identity{{{x+self.i()+1}}}{{{y}}}{{{-1}}}
 {{{o_right}}}{{{rr}}}{{{gr}}}{{{br}}}\n"""
             str_latex += f"""\\lineknit{{{x+self.i()}}}{{{y}}}{{{1}}}
-{{{o_left}}}{{{1}}}{{{1}}}{{{1}}}{{line width=\\outlineThickness*\\dx, color=white}}\n"""
+{{{o_left}}}{{{1}}}{{{1}}}{{{1}}}{{line width=\\outlineThickness*\\dx, color=white}}{{0}}\n"""
             str_latex += f"""\\identity{{{x+self.i()}}}{{{y}}}{{{1}}}
 {{{o_left}}}{{{rl}}}{{{gl}}}{{{bl}}}\n"""
         else:
             str_latex += f"""\\identity{{{x+self.i()}}}{{{y}}}{{{1}}}
 {{{o_left}}}{{{rl}}}{{{gl}}}{{{bl}}}\n"""
             str_latex += f"""\\lineknit{{{x+self.i()+1}}}{{{y}}}{{{-1}}}
-{{{o_right}}}{{{1}}}{{{1}}}{{{1}}}{{line width=\\outlineThickness*\\dx, color=white}}\n"""
+{{{o_right}}}{{{1}}}{{{1}}}{{{1}}}{{line width=\\outlineThickness*\\dx, color=white}}{{0}}\n"""
             str_latex += f"""\\identity{{{x+self.i()+1}}}{{{y}}}{{{-1}}}
 {{{o_right}}}{{{rr}}}{{{gr}}}{{{br}}}\n"""
 
