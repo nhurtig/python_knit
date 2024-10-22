@@ -3,9 +3,11 @@
 \usepackage{amsmath, amssymb}
 
 % Declare layers for drawing swaps
+\pgfdeclarelayer{underall}
+\pgfdeclarelayer{overall}
 \pgfdeclarelayer{swaps}
 \pgfdeclarelayer{boxes}
-\pgfsetlayers{swaps,main,boxes}
+\pgfsetlayers{underall,swaps,overall,main,boxes}
 
 % CONSTANTS
 
@@ -14,14 +16,14 @@
 \newcommand{\dx}{\dxNoUnit cm}         % width of tile with units
 \newcommand{\dy}{\dyNoUnit cm}         % height of tile with units
 \newcommand{\strandThickness}{0.07}    % proportion of tile width
-\newcommand{\outlineThickness}{0.15}   % white outline for crossings, proportion of width
+\newcommand{\outlineThickness}{0.1}   % white outline for crossings, proportion of width
 \newcommand{\knitThickness}{0.07}      % proportion of tile width
 \newcommand{\myPi}{3.1415926535}       % approximation of Pi
 % \newcommand{\myPi}{3}                % alternative simplified value for Pi
-\newcommand{\strandOverlap}{0.05}     % proportion of tile width for overlap
+\newcommand{\strandOverlap}{0.00}     % proportion of tile width for overlap
 \newcommand{\loopSpace}{4}             % proportion of strand thickness for loop spacing
 \newcommand{\numSamples}{30}
-\newcommand{\loopOpacity}{0.3}
+\newcommand{\loopOpacity}{0.2}
 \newcommand{\lineUpFudge}{0.09} % 0 for no line up fudge, >0 for some
 
 % COMMANDS
@@ -39,7 +41,7 @@
     (2 * (-2*#1*#1*#1 + 3 * #1 * #1) - 1)
 }
 
-% Helper for drawing smooth knit lines (x, y, bias, x offset, style, r, g, b, strand overlap)
+% Helper for drawing smooth knit lines (x, y, bias, x offset, style, r, g, b, fudge factor)
 \newcommand{\lineknithelper}[9]{
     \pgfsys@color@rgb@stroke{#6}{#7}{#8}
     \draw [smooth, samples=\numSamples, domain=0-#9:1+#9, #5]
@@ -56,12 +58,12 @@
     );
 }
 
-% Helper for drawing fill between loops (x, y, bias, left offset, right offset, r, g, b)
-\newcommand{\fillknithelper}[8]{
+% Helper for drawing fill between loops (x, y, bias, left offset, right offset, r, g, b, domain radius)
+\newcommand{\fillknithelper}[9]{
     \pgfsys@color@rgb@fill{#6}{#7}{#8}
     \fill[opacity=\loopOpacity]
-    (#4*\dxNoUnit + #1*\dxNoUnit + 0.5*\dxNoUnit + 0.5*\dxNoUnit*#3 - \dxNoUnit*0.5*#3, #2*\dyNoUnit) --
-    plot[smooth, samples=\numSamples, domain={0}:{1}]
+    (#4*\dxNoUnit + #1*\dxNoUnit + 0.5*\dxNoUnit, #2*\dyNoUnit) --
+    plot[smooth, samples=\numSamples, domain={0.5-#9}:{0.5+#9}]
     (
         {
             #4*\dxNoUnit + #1*\dxNoUnit + 0.5*\dxNoUnit + 0.5*\dxNoUnit*#3 + \dxNoUnit*0.5*#3
@@ -73,9 +75,9 @@
             #2*\dyNoUnit + \x*\dyNoUnit
         }
     ) --
-    (#4*\dxNoUnit + #1*\dxNoUnit + 0.5*\dxNoUnit + 0.5*\dxNoUnit*#3 + \dxNoUnit*0.5*#3, #2*\dyNoUnit + \dyNoUnit) --
-    (#5*\dxNoUnit + #1*\dxNoUnit + 0.5*\dxNoUnit + 0.5*\dxNoUnit*#3 + \dxNoUnit*0.5*#3, #2*\dyNoUnit + \dyNoUnit) --
-    plot[smooth, samples=\numSamples, domain={1}:{0}]
+    (#4*\dxNoUnit + #1*\dxNoUnit + 0.5*\dxNoUnit + \dxNoUnit*#3, #2*\dyNoUnit + \dyNoUnit) --
+    (#5*\dxNoUnit + #1*\dxNoUnit + 0.5*\dxNoUnit + \dxNoUnit*#3, #2*\dyNoUnit + \dyNoUnit) --
+    plot[smooth, samples=\numSamples, domain={0.5+#9}:{0.5-#9}]
     (
         {
             #5*\dxNoUnit + #1*\dxNoUnit + 0.5*\dxNoUnit + 0.5*\dxNoUnit*#3 + \dxNoUnit*0.5*#3
@@ -87,14 +89,14 @@
             #2*\dyNoUnit + \x*\dyNoUnit
         }
     ) --
-    (#5*\dxNoUnit + #1*\dxNoUnit + 0.5*\dxNoUnit + 0.5*\dxNoUnit*#3 - \dxNoUnit*0.5*#3, #2*\dyNoUnit) --
+    (#5*\dxNoUnit + #1*\dxNoUnit + 0.5*\dxNoUnit, #2*\dyNoUnit) --
     cycle;
 }
 
 % Draw knit lines (x, y, bias, object, r, g, b, style, strand overlap)
 \newcommand{\lineknit}[9]{
     \ifthenelse{\equal{#4}{l}}{
-        \fillknithelper{#1}{#2}{#3}{-\loopSpace*\strandThickness}{\loopSpace*\strandThickness}{#5}{#6}{#7}
+        \fillknithelper{#1}{#2}{#3}{-\loopSpace*\strandThickness}{\loopSpace*\strandThickness}{#5}{#6}{#7}{0.5}
         \lineknithelper{#1}{#2}{#3}{-\loopSpace*\strandThickness}{#8}{#5}{#6}{#7}{#9}
         \lineknithelper{#1}{#2}{#3}{\loopSpace*\strandThickness}{#8}{#5}{#6}{#7}{#9}
     }{
@@ -128,34 +130,105 @@
     \filldraw (#1*\dx+0.5*\dx,#2*\dy+0.5*\dy) circle (\strandThickness*\dx);
 }
 
-% Sigma knit (pos/neg, left, right, x, y)
-\newcommand{\sigmaknit}[5]{
-    \begin{pgfonlayer}{swaps}
-    \ifthenelse{\equal{#1}{pos}}{
-        \identity{(#4+1)}{#5}{-1}{#3}
-        \lineknit{#4}{#5}{1}{#2}{line width=\outlineThickness*\dx, color=white}{0}
-        \identity{#4}{#5}{1}{#2}
-    }{
-        \identity{#4}{#5}{1}{#2}
-        \lineknit{(#4+1)}{#5}{-1}{#3}{line width=\outlineThickness*\dx, color=white}{0}
-        \identity{(#4+1)}{#5}{-1}{#3}
-    }
-    \end{pgfonlayer}
-}
-
+\newcommand{\patchX}{0.115}
+\newcommand{\patchY}{0.012}
+\newcommand{\lineX}{0.095}
+\newcommand{\lineY}{0.05}
 % Twist knit (pos/neg, x, y, r, g, b)
 \newcommand{\twist}[6]{
-    \begin{pgfonlayer}{swaps}
+    \begin{pgfonlayer}{swaps}  % \ifthenelse{\equal{#4}{l}}{
+        %     \fillknithelper{#1}{#2}{#3}{-\loopSpace*\strandThickness}{\loopSpace*\strandThickness}{#5}{#6}{#7}
+        %     \lineknithelper{#1}{#2}{#3}{-\loopSpace*\strandThickness}{#8}{#5}{#6}{#7}{#9}
+        %     \lineknithelper{#1}{#2}{#3}{\loopSpace*\strandThickness}{#8}{#5}{#6}{#7}{#9}
+        % }{
+        %     \lineknithelper{#1}{#2}{#3}{0}{#8}{#5}{#6}{#7}{#9}
+        % }
     \ifthenelse{\equal{#1}{pos}}{
+        % under
         \identity{(#2+\loopSpace*\strandThickness)}{#3}{-2*\loopSpace*\strandThickness}{c}{#4}{#5}{#6}
+        % trace over
         \lineknit{(#2-\loopSpace*\strandThickness)}{#3}{2*\loopSpace*\strandThickness}{c}{1}{1}{1}{line width=\outlineThickness*\dx, color=white}{0}
+
+        % fill
+        % NOTE: some horrible order of operations stuff happens between this
+        % param setup and the filltwist mult by dxNoUnit
+        \filltwist{#2*\dxNoUnit-\loopSpace*\strandThickness}{#2*\dxNoUnit+\loopSpace*\strandThickness}{#3}{#4}{#5}{#6}{2*\loopSpace*\strandThickness}
+
+        % white patch
+        \fill[white]
+        (#2*\dxNoUnit+0.5*\dxNoUnit - \patchX, #3*\dyNoUnit + 0.5*\dyNoUnit + \patchY) --
+        (#2*\dxNoUnit+0.5*\dxNoUnit - \patchX + \lineX, #3*\dyNoUnit + 0.5*\dyNoUnit + \patchY + \lineY) --
+        (#2*\dxNoUnit+0.5*\dxNoUnit + \patchX, #3*\dyNoUnit + 0.5*\dyNoUnit - \patchY) --
+        (#2*\dxNoUnit+0.5*\dxNoUnit + \patchX - \lineX, #3*\dyNoUnit + 0.5*\dyNoUnit - \patchY - \lineY) --
+        cycle;
+        % color patch
+        \pgfsys@color@rgb@fill{#4}{#5}{#6}
+        \fill[opacity=\loopOpacity]
+        (#2*\dxNoUnit+0.5*\dxNoUnit - \patchX, #3*\dyNoUnit + 0.5*\dyNoUnit + \patchY) --
+        (#2*\dxNoUnit+0.5*\dxNoUnit - \patchX + \lineX, #3*\dyNoUnit + 0.5*\dyNoUnit + \patchY + \lineY) --
+        (#2*\dxNoUnit+0.5*\dxNoUnit + \patchX, #3*\dyNoUnit + 0.5*\dyNoUnit - \patchY) --
+        (#2*\dxNoUnit+0.5*\dxNoUnit + \patchX - \lineX, #3*\dyNoUnit + 0.5*\dyNoUnit - \patchY - \lineY) --
+        cycle;
+ 
         \identity{(#2-\loopSpace*\strandThickness)}{#3}{2*\loopSpace*\strandThickness}{c}{#4}{#5}{#6}
     }{
         \identity{(#2-\loopSpace*\strandThickness)}{#3}{2*\loopSpace*\strandThickness}{c}{#4}{#5}{#6}
         \lineknit{(#2+\loopSpace*\strandThickness)}{#3}{-2*\loopSpace*\strandThickness}{c}{1}{1}{1}{line width=\outlineThickness*\dx, color=white}{0}
+        \filltwist{#2*\dxNoUnit-\loopSpace*\strandThickness}{#2*\dxNoUnit+\loopSpace*\strandThickness}{#3}{#4}{#5}{#6}{2*\loopSpace*\strandThickness}
+        % white patch
+        \fill[white]
+        (#2*\dxNoUnit+0.5*\dxNoUnit - \patchX, #3*\dyNoUnit + 0.5*\dyNoUnit - \patchY) --
+        (#2*\dxNoUnit+0.5*\dxNoUnit - \patchX + \lineX, #3*\dyNoUnit + 0.5*\dyNoUnit - \patchY - \lineY) --
+        (#2*\dxNoUnit+0.5*\dxNoUnit + \patchX, #3*\dyNoUnit + 0.5*\dyNoUnit + \patchY) --
+        (#2*\dxNoUnit+0.5*\dxNoUnit + \patchX - \lineX, #3*\dyNoUnit + 0.5*\dyNoUnit + \patchY + \lineY) --
+        cycle;
+        % color patch
+        \pgfsys@color@rgb@fill{#4}{#5}{#6}
+        \fill[opacity=\loopOpacity]
+        (#2*\dxNoUnit+0.5*\dxNoUnit - \patchX, #3*\dyNoUnit + 0.5*\dyNoUnit - \patchY) --
+        (#2*\dxNoUnit+0.5*\dxNoUnit - \patchX + \lineX, #3*\dyNoUnit + 0.5*\dyNoUnit - \patchY - \lineY) --
+        (#2*\dxNoUnit+0.5*\dxNoUnit + \patchX, #3*\dyNoUnit + 0.5*\dyNoUnit + \patchY) --
+        (#2*\dxNoUnit+0.5*\dxNoUnit + \patchX - \lineX, #3*\dyNoUnit + 0.5*\dyNoUnit + \patchY + \lineY) --
+        cycle;
         \identity{(#2+\loopSpace*\strandThickness)}{#3}{-2*\loopSpace*\strandThickness}{c}{#4}{#5}{#6}
     }
     \end{pgfonlayer}
+}
+% Helper for drawing fill between loops (x, y, bias, left offset, right offset, r, g, b)
+
+% Fill the space between a twist (x1, x2, y, r, g, b, x2 - x1)
+\newcommand{\filltwist}[7]{
+    \pgfsys@color@rgb@fill{#4}{#5}{#6}
+    \fill[opacity=\loopOpacity]
+    (#1*\dxNoUnit + 0.5*\dxNoUnit, #3*\dyNoUnit) --
+    plot[smooth, samples=\numSamples, domain={0}:{1}]
+    (
+        {
+            #1*\dxNoUnit + 0.75*\dxNoUnit + \dxNoUnit*0.5*#7
+            *
+            \curveFunc{\x}
+            % sin(deg(\myPi*\x - 0.5*\myPi))
+        },
+        {
+            #3*\dyNoUnit + \x*\dyNoUnit
+        }
+    ) --
+    (#2*\dxNoUnit + 0.5*\dxNoUnit, #3*\dyNoUnit + \dyNoUnit) --
+    (#1*\dxNoUnit + 0.5*\dxNoUnit, #3*\dyNoUnit + \dyNoUnit) --
+    plot[smooth, samples=\numSamples, domain={1}:{0}]
+    (
+        {
+            #1*\dxNoUnit + 0.75*\dxNoUnit - \dxNoUnit*0.5*#7
+            *
+            \curveFunc{\x}
+            % sin(deg(\myPi*\x - 0.5*\myPi))
+        },
+        {
+            #3*\dyNoUnit + \x*\dyNoUnit
+        }
+    ) --
+    (#2*\dxNoUnit + 0.5*\dxNoUnit, #3*\dyNoUnit) --
+    cycle;
 }
 
 % Knit shape (direction, bed, num in, num out, x, y)
@@ -165,18 +238,50 @@
     \else
         \begin{pgfonlayer}{boxes}
             \draw [line width=\knitThickness*\dx]
-            (#5*\dx,#6*\dy) -- (#5*\dx+#3*\dx,#6*\dy) -- (#5*\dx+#4*\dx,#6*\dy+\dy)
-            -- (#5*\dx,#6*\dy+\dy) -- (#5*\dx,#6*\dy) -- (#5*\dx+#3*\dx,#6*\dy)
-            -- (#5*\dx+#4*\dx,#6*\dy+\dy);
+            (#5*\dx,#6*\dy) -- (#5*\dx+#3*\dx,#6*\dy) --
+            plot[smooth, samples=\numSamples, domain={0}:{1}]
+            (
+                {
+                    #5*\dxNoUnit+#3*\dxNoUnit+0.5*(#4 - #3)*\dxNoUnit + 0.5*(#4 - #3)*\dxNoUnit
+                    *
+                    \curveFunc{\x}
+                    % sin(deg(\myPi*\x - 0.5*\myPi))
+                },
+                {
+                    #6*\dyNoUnit + \x*\dyNoUnit
+                }
+            ) --
+            (#5*\dx+#4*\dx,#6*\dy+\dy)
+            -- (#5*\dx,#6*\dy+\dy) -- cycle;
+            % (#5*\dx,#6*\dy) -- (#5*\dx+#3*\dx,#6*\dy);
             \node[anchor=west] at (#5*\dx,#6*\dy+0.5*\dy) {\knitlabel{#1}{#2}};
         \end{pgfonlayer}
     \fi \else
         \begin{pgfonlayer}{boxes}
             \draw [line width=\knitThickness*\dx]
-            (#5*\dx,#6*\dy) -- (#5*\dx+#3*\dx,#6*\dy) -- (#5*\dx+#4*\dx,#6*\dy+\dy)
-            -- (#5*\dx,#6*\dy+\dy) -- (#5*\dx,#6*\dy) -- (#5*\dx+#3*\dx,#6*\dy)
-            -- (#5*\dx+#4*\dx,#6*\dy+\dy);
+            (#5*\dx,#6*\dy) -- (#5*\dx+#3*\dx,#6*\dy) --
+            plot[smooth, samples=\numSamples, domain={0}:{1}]
+            (
+                {
+                    #5*\dxNoUnit+#3*\dxNoUnit+0.5*(#4 - #3)*\dxNoUnit + 0.5*(#4 - #3)*\dxNoUnit
+                    *
+                    \curveFunc{\x}
+                    % sin(deg(\myPi*\x - 0.5*\myPi))
+                },
+                {
+                    #6*\dyNoUnit + \x*\dyNoUnit
+                }
+            ) --
+            (#5*\dx+#4*\dx,#6*\dy+\dy)
+            -- (#5*\dx,#6*\dy+\dy) -- cycle;
+            % (#5*\dx,#6*\dy) -- (#5*\dx+#3*\dx,#6*\dy);
             \node[anchor=west] at (#5*\dx,#6*\dy+0.5*\dy) {\knitlabel{#1}{#2}};
+            \fill
+            (#5*\dx+#3*\dx-0.5*\knitThickness*\dx,#6*\dy-0.5*\knitThickness*\dx) --
+            (#5*\dx+#3*\dx+0.5*\knitThickness*\dx,#6*\dy-0.5*\knitThickness*\dx) --
+            (#5*\dx+#3*\dx+0.5*\knitThickness*\dx,#6*\dy+0.5*\knitThickness*\dx) --
+            (#5*\dx+#3*\dx-0.5*\knitThickness*\dx,#6*\dy+0.5*\knitThickness*\dx) --
+            cycle;
         \end{pgfonlayer}
     \fi
 }

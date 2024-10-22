@@ -95,8 +95,18 @@ class Permutation(Latex):
             strand_start = self.__perm.index(i)
             o = context[strand_start]
             (r, g, b) = o.color()
-            str_latex += f"""\\lineknit{{{x+strand_start}}}{{{y}}}{{{i - strand_start}}}
+            if str(o) == "c":
+                str_latex += f"""\\lineknit{{{x+strand_start}}}{{{y}}}{{{i - strand_start}}}
 {{{o}}}{{{r}}}{{{g}}}{{{b}}}{{line width=\\outlineThickness*\\dx, color=white}}{{0}}\n"""
+            else:
+                # avoid white fill
+                str_latex += f"""\\lineknithelper{{{x+strand_start}}}{{{y}}}{{{i-strand_start}}}
+{{-\\loopSpace*\\strandThickness}}
+{{line width=\\outlineThickness*\\dx, color=white}}{{{r}}}{{{g}}}{{{b}}}{{0}}\n"""
+                str_latex += f"""\\lineknithelper{{{x+strand_start}}}{{{y}}}{{{i-strand_start}}}
+{{\\loopSpace*\\strandThickness}}
+{{line width=\\outlineThickness*\\dx, color=white}}{{{r}}}{{{g}}}{{{b}}}{{0}}\n"""
+
             str_latex += f"""\\identity{{{x+strand_start}}}{{{y}}}{{{i - strand_start}}}
 {{{o}}}{{{r}}}{{{g}}}{{{b}}}\n"""
         str_latex += "\\end{pgfonlayer}\n"
