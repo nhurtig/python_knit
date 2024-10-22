@@ -6,6 +6,7 @@ import colorsys
 
 COLOR_OFFSET: float = 0
 
+
 # van der corput sequence
 class ColorGenerator:
     """Generator that emits a series
@@ -32,7 +33,7 @@ class ColorGenerator:
         return (r, g, b)
 
     @staticmethod
-    def __van_der_corput(i: int, base: int=2) -> float:
+    def __van_der_corput(i: int, base: int = 2) -> float:
         result = 0.0
         fraction = 1 / base
         while i > 0:

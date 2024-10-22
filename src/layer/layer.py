@@ -260,8 +260,11 @@ class Layer(Latex):
             o = context[i]
             (r, g, b) = o.color()
             for j in range(box_height):
-                str_latex += f"""\\identity{{{x+i}}}{{{y+j}}}
-{{{len(self.__middle.outs()) - len(self.__middle.ins())}}}{{{o}}}{{{r}}}{{{g}}}{{{b}}}\n"""
+                str_latex += f"""\\identity{{{
+                    x+i if j == 0 else
+                    x + i + len(self.__middle.outs()) - len(self.__middle.ins())}}}{{{y+j}}}
+{{{len(self.__middle.outs()) - len(self.__middle.ins()) if j == 0 else 0}}}
+{{{o}}}{{{r}}}{{{g}}}{{{b}}}\n"""
 
         str_latex += self.__above.to_latex(
             x,

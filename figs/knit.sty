@@ -136,13 +136,7 @@
 \newcommand{\lineY}{0.05}
 % Twist knit (pos/neg, x, y, r, g, b)
 \newcommand{\twist}[6]{
-    \begin{pgfonlayer}{swaps}  % \ifthenelse{\equal{#4}{l}}{
-        %     \fillknithelper{#1}{#2}{#3}{-\loopSpace*\strandThickness}{\loopSpace*\strandThickness}{#5}{#6}{#7}
-        %     \lineknithelper{#1}{#2}{#3}{-\loopSpace*\strandThickness}{#8}{#5}{#6}{#7}{#9}
-        %     \lineknithelper{#1}{#2}{#3}{\loopSpace*\strandThickness}{#8}{#5}{#6}{#7}{#9}
-        % }{
-        %     \lineknithelper{#1}{#2}{#3}{0}{#8}{#5}{#6}{#7}{#9}
-        % }
+    \begin{pgfonlayer}{swaps}
     \ifthenelse{\equal{#1}{pos}}{
         % under
         \identity{(#2+\loopSpace*\strandThickness)}{#3}{-2*\loopSpace*\strandThickness}{c}{#4}{#5}{#6}
@@ -237,7 +231,7 @@
         % Do nothing if num in == 0 and num out == 0
     \else
         \begin{pgfonlayer}{boxes}
-            \draw [line width=\knitThickness*\dx]
+            \draw [line width=\knitThickness*\dx, line join=round]
             (#5*\dx,#6*\dy) -- (#5*\dx+#3*\dx,#6*\dy) --
             plot[smooth, samples=\numSamples, domain={0}:{1}]
             (
@@ -258,7 +252,7 @@
         \end{pgfonlayer}
     \fi \else
         \begin{pgfonlayer}{boxes}
-            \draw [line width=\knitThickness*\dx]
+            \draw [line width=\knitThickness*\dx, line join=round]
             (#5*\dx,#6*\dy) -- (#5*\dx+#3*\dx,#6*\dy) --
             plot[smooth, samples=\numSamples, domain={0}:{1}]
             (
@@ -266,7 +260,6 @@
                     #5*\dxNoUnit+#3*\dxNoUnit+0.5*(#4 - #3)*\dxNoUnit + 0.5*(#4 - #3)*\dxNoUnit
                     *
                     \curveFunc{\x}
-                    % sin(deg(\myPi*\x - 0.5*\myPi))
                 },
                 {
                     #6*\dyNoUnit + \x*\dyNoUnit
@@ -274,28 +267,10 @@
             ) --
             (#5*\dx+#4*\dx,#6*\dy+\dy)
             -- (#5*\dx,#6*\dy+\dy) -- cycle;
-            % (#5*\dx,#6*\dy) -- (#5*\dx+#3*\dx,#6*\dy);
             \node[anchor=west] at (#5*\dx,#6*\dy+0.5*\dy) {\knitlabel{#1}{#2}};
-            \fill
-            (#5*\dx+#3*\dx-0.5*\knitThickness*\dx,#6*\dy-0.5*\knitThickness*\dx) --
-            (#5*\dx+#3*\dx+0.5*\knitThickness*\dx,#6*\dy-0.5*\knitThickness*\dx) --
-            (#5*\dx+#3*\dx+0.5*\knitThickness*\dx,#6*\dy+0.5*\knitThickness*\dx) --
-            (#5*\dx+#3*\dx-0.5*\knitThickness*\dx,#6*\dy+0.5*\knitThickness*\dx) --
-            cycle;
         \end{pgfonlayer}
     \fi
 }
-
-% \newcommand{\knit}[6]{
-% \ifnum#3=0 \ifnum#4=0
-% \begin{pgfonlayer}{boxes}
-%     \draw [line width=\knitThickness*\dx]
-%     (#5*\dx,#6*\dy) -- (#5*\dx+#3*\dx,#6*\dy) -- (#5*\dx+#4*\dx,#6*\dy+\dy)
-%     -- (#5*\dx,#6*\dy+\dy) -- (#5*\dx,#6*\dy) -- (#5*\dx+#3*\dx,#6*\dy)
-%     -- (#5*\dx+#4*\dx,#6*\dy+\dy);
-%     \node[anchor=west] at (#5*\dx,#6*\dy+0.5*\dy) {\knitlabel{#1}{#2}};
-% \end{pgfonlayer}
-% }
 
 % Knit label (direction, bed)
 \newcommand{\knitlabel}[2]{%
@@ -312,14 +287,4 @@
             $\blacktriangleleft$ % Back Left
         }%
     }%
-}
-
-% Bed knit direction
-\newcommand{\bedknit}[1]{%
-    \ifthenelse{\equal{#1}{front}}{F}{B}%
-}
-
-% Knit direction
-\newcommand{\dirknit}[1]{%
-    \ifthenelse{\equal{#1}{right}}{R}{L}%
 }
