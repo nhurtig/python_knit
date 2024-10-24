@@ -12,6 +12,7 @@ from fig_gen.basic_rewrites import (
     yang_baxter,
 )
 from fig_gen.canon_example import word_sigma, word_delta
+from fig_gen.draw_a_braid import draw_my_braid
 from fig_gen.full_example import display_word_steps
 from fig_gen.poster_example import draw_poster_word
 
@@ -28,7 +29,8 @@ def main() -> None:
     # word_sigma()
     # word_delta()
     # display_word_steps()
-    draw_poster_word()
+    # draw_poster_word()
+    draw_my_braid()
 
 
 if __name__ == "__main__":
