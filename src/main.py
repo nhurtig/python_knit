@@ -13,7 +13,7 @@ from fig_gen.basic_rewrites import (
 )
 from fig_gen.canon_example import word_sigma, word_delta
 from fig_gen.full_example import display_word_steps
-from fig_gen.random_example import draw_poster_word
+from fig_gen.poster_example import draw_poster_word
 
 
 def main() -> None:

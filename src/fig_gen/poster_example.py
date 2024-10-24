@@ -10,7 +10,7 @@ from category.object import Carrier, Loop, PrimitiveObject
 from common.common import Bed, Dir
 from fig_gen.color import reset_colors
 from layer.layer import Layer
-from layer.word import Word
+from layer.word import CanonWord, Word
 
 MIN_INS: int = 0
 MAX_INS: int = 4
@@ -19,9 +19,10 @@ MAX_OUTS: int = 4
 MAX_LETTERS_PER_WORD: int = 8
 NUM_BOXES: int = 5
 
-dummy_loop = Loop(0) # so colors don't get messed up
+dummy_loop = Loop(0)  # so colors don't get messed up
 
 random.seed(31)
+
 
 def random_word(num_boxes: int, rng: Callable[[], float]) -> Word:
     """Generates a random Word.
@@ -41,7 +42,6 @@ def random_word(num_boxes: int, rng: Callable[[], float]) -> Word:
         dummy_knit = Knit(
             Bed(rng() < 0.5),
             Dir(rng() < 0.5),
-            # TODO: match knit structure
             [dummy_loop for _ in range(knit_ins)],
             [dummy_loop for _ in range(knit_outs)],
         )
@@ -68,7 +68,10 @@ def random_word(num_boxes: int, rng: Callable[[], float]) -> Word:
                         break
                 outs.append(l)
         k = Knit(
-            Bed(rng() < 0.5), Dir(rng() < 0.5), [dummy_loop for _ in range(knit_ins)], outs
+            Bed(rng() < 0.5),
+            Dir(rng() < 0.5),
+            [dummy_loop for _ in range(knit_ins)],
+            outs,
         )
 
         left = int(rng() * (prev_b.n() - knit_ins))
@@ -108,7 +111,7 @@ def draw_poster_word() -> None:
     l11 = Loop(0)
     l11.twist(True)
     c11 = Carrier(0)
-    k1 = Knit(Bed(True), Dir(True), [], [l11, c11])
+    k1 = Knit(Bed(True), Dir(True), [None], [l11, c11])
     b1 = Braid.str_to_braid(2, "A")
     l1 = Layer(0, k1, b1, Braid(0))
     w.append_layer(l1)
@@ -135,9 +138,10 @@ def draw_poster_word() -> None:
 
     l41 = Loop(0)
     l41.twist(True)
-    k4 = Knit(Bed(True), Dir(False), [l31, l21, c31], [l41])
+    k4 = Knit(Bed(True), Dir(False), [l31, l21, c31], [None, l41, None, None])
     b4 = Braid.str_to_braid(2, "aa")
     l4 = Layer(0, k4, b4, b3)
     w.append_layer(l4)
 
     w.compile_latex("poster_word", [])
+    # CanonWord(w).compile_latex("poster_word_canon", [])
