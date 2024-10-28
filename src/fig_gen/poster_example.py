@@ -10,7 +10,7 @@ from category.object import Carrier, Loop, PrimitiveObject
 from common.common import Bed, Dir
 from fig_gen.color import reset_colors
 from layer.layer import Layer
-from layer.word import CanonWord, Word
+from layer.word import Word
 
 MIN_INS: int = 0
 MAX_INS: int = 4

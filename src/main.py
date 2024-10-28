@@ -20,16 +20,16 @@ from fig_gen.poster_example import draw_poster_word
 def main() -> None:
     """Executes many PDF-PNG drawing commands
     used in the presentation"""
-    # sigma_cancel()
-    # morph_swap()
-    # sigma_underline()
-    # sigma_conj()
-    # delta_conj()
-    # yang_baxter()
-    # word_sigma()
-    # word_delta()
-    # display_word_steps()
-    # draw_poster_word()
+    sigma_cancel()
+    morph_swap()
+    sigma_underline()
+    sigma_conj()
+    delta_conj()
+    yang_baxter()
+    word_sigma()
+    word_delta()
+    display_word_steps()
+    draw_poster_word()
     draw_my_braid()
 
 
