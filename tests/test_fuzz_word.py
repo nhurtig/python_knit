@@ -8,7 +8,7 @@ from category.morphism import Knit
 from category.object import Loop
 from common.common import Bed, Dir
 from layer.layer import Layer
-from layer.word import CanonWord, Word
+from layer.word import Word
 from tests.test_fuzz_braid import random_braid_word
 
 # Constants
@@ -28,7 +28,6 @@ TEST_OUT_INFO = "word_fuzz_out.txt"
 TEST_ERROR_INFO = "word_fuzz_err.txt"
 UPDATE_FREQ = (MAX_BOXES + 1 - MIN_BOXES) * WORDS_PER_NUM_BOXES * MUTANTS_PER_WORD
 THREADS = 4
-# Took 177 seconds for bastion
 BASE_SEED = 7000
 
 
@@ -76,7 +75,8 @@ def fuzz_word_canonicalization(seed: int, thread_id: int) -> None:
             for _ in range(WORDS_PER_NUM_BOXES):
                 # Generate a random word
                 original = random_word(num_boxes, rng)
-                original_canon = CanonWord(original.copy())
+                original_canon = original.copy()
+                original_canon.canonicalize()
 
                 for _ in range(MUTANTS_PER_WORD):
                     # Create a mutant
@@ -88,14 +88,20 @@ def fuzz_word_canonicalization(seed: int, thread_id: int) -> None:
                     )
 
                     # Chech canon forms are equal
-                    mutant_canon = CanonWord(mutant)
+                    mutant_canon = mutant.copy()
+                    mutant_canon.canonicalize()
                     if original_canon != mutant_canon:
                         with open(TEST_ERROR_INFO, "a+", encoding="utf-8") as f:
                             f.write(repr(original))
+                            f.write("\n")
                             f.write(repr(original_canon))
+                            f.write("\n")
                             f.write(str(original_canon))
+                            f.write("\n")
                             f.write(repr(mutant))
+                            f.write("\n")
                             f.write(repr(mutant_canon))
+                            f.write("\n")
                             f.write(str(mutant_canon))
                             f.write("\n")
                         assert (
@@ -130,6 +136,11 @@ def test_word_canonicalization_fuzzing_multithreaded() -> None:
 
         for future in done:
             future.result()
+
+
+def test_word_canonicalization_fuzzing_singlethreaded() -> None:
+    """Tests word canonicalization by fuzzing with one thread."""
+    fuzz_word_canonicalization(BASE_SEED - 1, -1)
 
 
 # Run the multithreaded test

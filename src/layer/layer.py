@@ -8,7 +8,6 @@ from __future__ import annotations
 from typing import Callable, Sequence
 from braid.braid import Braid
 from braid.braid_generator import BraidGenerator
-from braid.canon.canon_braid import CanonBraid
 from category.morphism import Knit
 from category.object import PrimitiveObject
 from common.common import Dir, Sign
@@ -26,6 +25,15 @@ class Layer(Latex):
         # TODO: check that n() of above, below match left, mid, right
         self.__above = above
         self.__below = below
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Layer):
+            return False
+        return (
+            self.left() == other.left()
+            and self.middle() == other.middle()
+            and self.above() == other.above()
+        )
 
     def copy(self, below: Braid) -> tuple[Layer, Braid]:
         """Copies the layer. Takes the below braid
@@ -82,12 +90,20 @@ class Layer(Latex):
         return self.__above.subbraid(keep)
 
     def below(self) -> Braid:
-        """Getter of a copy
+        """Getter
 
         Returns:
-            Braid: Copy of below braid
+            Braid: Below braid
         """
-        return self.__below.copy()
+        return self.__below
+
+    def above(self) -> Braid:
+        """Getter
+
+        Returns:
+            Braid: above braid
+        """
+        return self.__above
 
     def primary_twists(self) -> int:
         """Returns the number of times
@@ -189,17 +205,37 @@ class Layer(Latex):
 
                 self.__left += 1
 
-    def layer_canon(self) -> CanonBraid:
-        """Canonicalizes the above braid
-        and returns it. Can't mutate in
-        place because canon braids and
-        non-canon braids are different.
+    def canonicalize(self) -> None:
+        """Canonicalizes this layer, mutating
+        it in place"""
+        self.delta_step()
+        self.macro_step()
+        self.layer_canon()
 
-        Returns:
-            CanonBraid: Canonical form of
-            the above braid.
+    def delta_step(self) -> None:
+        """Performs the delta step of the algorithm
+        on this layer, mutating it in place
         """
-        return CanonBraid(self.__above)
+        while self.primary_twists() != 0:
+            sign = self.primary_twists() < 0
+            self.delta(Sign(sign))
+
+    def macro_step(self) -> None:
+        """Performs the macro step of the algorithm
+        on this layer, mutating it in place
+        """
+        for gen in self.macro_subbraid():
+            if gen.i() == self.left() - 1:
+                self.underline_conj(Dir(False), gen.pos())
+            elif gen.i() == self.left():
+                self.underline_conj(Dir(True), not gen.pos())
+            else:
+                self.sigma_conj(gen.i(), Sign(not gen.pos()))
+
+    def layer_canon(self) -> None:
+        """Canonicalizes the above braid of this
+        layer, mutating it in place"""
+        self.__above = self.__above.canon()
 
     def fuzz_layer(self, rng: Callable[[], float], steps: int) -> None:
         """Fuzzes this layer by performing layer operations; doesn't
@@ -265,134 +301,6 @@ class Layer(Latex):
                     x + i + len(self.__middle.outs()) - len(self.__middle.ins())}}}{{{y+j}}}
 {{{len(self.__middle.outs()) - len(self.__middle.ins()) if j == 0 else 0}}}
 {{{o}}}{{{r}}}{{{g}}}{{{b}}}\n"""
-
-        str_latex += self.__above.to_latex(
-            x,
-            y + box_height,
-            list(context[: self.__left])
-            + list(self.__middle.context_out(box_context_in))
-            + list(context[self.__left + len(self.__middle.ins()) :]),
-        )
-        return str_latex
-
-    def latex_height(self) -> int:
-        return self.__middle.latex_height() + self.__above.latex_height()
-
-    def context_out(
-        self, context: Sequence[PrimitiveObject]
-    ) -> Sequence[PrimitiveObject]:
-        box_context_in = context[self.__left : self.__left + len(self.__middle.ins())]
-        return self.__above.context_out(
-            list(context[: self.__left])
-            + list(self.__middle.context_out(box_context_in))
-            + list(context[self.__left + len(self.__middle.ins()) :])
-        )
-
-
-class CanonLayer(Latex):
-    """CanonLayer is a class meant to
-    capture the canonical form of a layer.
-    It isn't meant to be mutated; it only
-    stores the above braid
-    """
-
-    def __init__(self, layer: Layer) -> None:
-        CanonLayer.delta_step(layer)
-        CanonLayer.macro_step(layer)
-        self.__left = layer.left()
-        self.__middle = layer.middle()
-        self.__above = layer.layer_canon()
-
-    def __eq__(self, other: object) -> bool:
-        if not isinstance(other, CanonLayer):
-            return False
-        return (
-            self.left() == other.left()
-            and self.middle() == other.middle()
-            and self.above() == other.above()
-        )
-
-    def left(self) -> int:
-        """Getter
-
-        Returns:
-            int: Number of identity strands to the
-            left of this layers' box
-        """
-        return self.__left
-
-    def middle(self) -> Knit:
-        """Getter
-
-        Returns:
-            Knit: Box in the middle of this
-            layer
-        """
-        return self.__middle
-
-    def above(self) -> CanonBraid:
-        """Getter
-
-        Returns:
-            CanonBraid: Braid on the top of
-            this layer
-        """
-        return self.__above
-
-    def __repr__(self) -> str:
-        return f"CanonLayer({repr(self.__middle)}:{repr(self.__above)})"
-
-    def __str__(self) -> str:
-        return f"\t{self.__above}\n{self.__middle}"
-
-    @staticmethod
-    def delta_step(layer: Layer) -> None:
-        """Performs the delta step of the algorithm
-        on the layer, mutating it in place
-
-        Args:
-            layer (Layer): Layer to be twisted
-        """
-        while layer.primary_twists() != 0:
-            sign = layer.primary_twists() < 0
-            layer.delta(Sign(sign))
-
-    @staticmethod
-    def macro_step(layer: Layer) -> None:
-        """Performs the macro step of the algorithm
-        on the layer, mutating it in place
-
-        Args:
-            layer (Layer): Layer to be macro
-            braided
-        """
-        for gen in layer.macro_subbraid():
-            if gen.i() == layer.left() - 1:
-                layer.underline_conj(Dir(False), gen.pos())
-            elif gen.i() == layer.left():
-                layer.underline_conj(Dir(True), not gen.pos())
-            else:
-                layer.sigma_conj(gen.i(), Sign(not gen.pos()))
-
-    def to_latex(self, x: int, y: int, context: Sequence[PrimitiveObject]) -> str:
-        str_latex = ""
-        box_context_in = context[self.__left : self.__left + len(self.__middle.ins())]
-        str_latex += self.__middle.to_latex(x + self.__left, y, box_context_in)
-        box_height = self.__middle.latex_height()
-        for i in range(self.__left):
-            o = context[i]
-            (r, g, b) = o.color()
-            for j in range(box_height):
-                str_latex += (
-                    f"\\identity{{{x+i}}}{{{y+j}}}{{{0}}}{{{o}}}{{{r}}}{{{g}}}{{{b}}}\n"
-                )
-
-        for i in range(self.__left + len(self.__middle.ins()), len(context)):
-            o = context[i]
-            (r, g, b) = o.color()
-            for j in range(box_height):
-                str_latex += f"""\\identity{{{x+i}}}{{{y+j}}}
-{{{len(self.__middle.outs()) - len(self.__middle.ins())}}}{{{o}}}{{{r}}}{{{g}}}{{{b}}}\n"""
 
         str_latex += self.__above.to_latex(
             x,

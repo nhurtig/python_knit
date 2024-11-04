@@ -2,11 +2,9 @@
 random examples for the poster"""
 
 import random
-from typing import Callable, Optional
 from braid.braid import Braid
-from braid.braid_generator import BraidGenerator
 from category.morphism import Knit
-from category.object import Carrier, Loop, PrimitiveObject
+from category.object import Carrier, Loop
 from common.common import Bed, Dir
 from fig_gen.color import reset_colors
 from layer.layer import Layer
@@ -22,86 +20,6 @@ NUM_BOXES: int = 5
 dummy_loop = Loop(0)  # so colors don't get messed up
 
 random.seed(31)
-
-
-def random_word(num_boxes: int, rng: Callable[[], float]) -> Word:
-    """Generates a random Word.
-
-    Args:
-        num_boxes (int): Number of boxes
-        rng (random.Random): Thread-specific random number generator
-
-    Returns:
-        Word: Random layer
-    """
-    w = Word()
-    prev_b = Braid(0)
-    for _ in range(num_boxes):
-        knit_ins = min(int(rng() * (MAX_INS - MIN_INS)) + MIN_INS, prev_b.n())
-        knit_outs = int(rng() * (MAX_OUTS - MIN_OUTS)) + MIN_OUTS
-        dummy_knit = Knit(
-            Bed(rng() < 0.5),
-            Dir(rng() < 0.5),
-            [dummy_loop for _ in range(knit_ins)],
-            [dummy_loop for _ in range(knit_outs)],
-        )
-        i = dummy_knit.primary_index()
-        carrier_index = -1
-        if knit_outs > 1:
-            carrier_index = i
-            while carrier_index == i:
-                carrier_index = int(rng() * knit_outs)
-        outs: list[Optional[PrimitiveObject]] = []
-        for j in range(knit_outs):
-            if j == carrier_index:
-                outs.append(Carrier(0))
-            else:
-                l = Loop(0)
-                twist_chance = 0.5
-                if j == i:
-                    twist_chance = 0.9
-                twist_sign = rng() < 0.5
-                while True:
-                    if rng() < twist_chance:
-                        l.twist(twist_sign)
-                    else:
-                        break
-                outs.append(l)
-        k = Knit(
-            Bed(rng() < 0.5),
-            Dir(rng() < 0.5),
-            [dummy_loop for _ in range(knit_ins)],
-            outs,
-        )
-
-        left = int(rng() * (prev_b.n() - knit_ins))
-        b = random_braid_word(
-            prev_b.n() + knit_outs - knit_ins, int(rng() * MAX_LETTERS_PER_WORD), rng
-        )
-        w.append_layer(Layer(left, k, b, prev_b))
-        prev_b = b
-
-    # w.fuzz(rng, 3, 20)
-    return w
-
-
-def random_braid_word(n: int, length: int, rng: Callable[[], float]) -> Braid:
-    """Generates a random braid word.
-
-    Args:
-        n (int): Number of strands
-        length (int): Number of generators
-
-    Returns:
-        Braid: Random braid word
-    """
-    word = Braid(n)
-    if n >= 2:
-        for _ in range(length):
-            i = int(rng() * (n - 1))  # generator index
-            pos = rng() < 0.5
-            word.append(BraidGenerator(i, pos))
-    return word
 
 
 def draw_poster_word() -> None:
@@ -144,4 +62,5 @@ def draw_poster_word() -> None:
     w.append_layer(l4)
 
     w.compile_latex("poster_word", [])
-    # CanonWord(w).compile_latex("poster_word_canon", [])
+    w.canonicalize()
+    w.compile_latex("poster_word_canon", [])

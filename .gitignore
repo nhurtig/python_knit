@@ -13,3 +13,4 @@ __pycache__
 *.log
 word_fuzz_out.txt
 word_fuzz_err.txt
+.coverage

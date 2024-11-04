@@ -10,7 +10,7 @@ from category.object import Carrier, Loop, PrimitiveObject
 from fig_gen.color import reset_colors, set_ghosting
 from common.common import Bed, Dir, Sign
 from layer.layer import Layer
-from layer.word import CanonWord, Word
+from layer.word import Word
 
 
 def init_word() -> tuple[Word, Layer, Layer, Sequence[PrimitiveObject]]:
@@ -68,7 +68,8 @@ def display_word_steps() -> None:
 
     w_new = Word()
     w_new.append_layer(layer)
-    CanonWord(w_new).compile_latex("full_4_ghost", l1.context_out(context))
+    w_new.canonicalize()
+    w_new.compile_latex("full_4_ghost", l1.context_out(context))
 
     set_ghosting([])
     (w, l1, layer, context) = init_word()
@@ -78,4 +79,5 @@ def display_word_steps() -> None:
     w.compile_latex("full_3", context)
     w_new = Word()
     w_new.append_layer(layer)
-    CanonWord(w_new).compile_latex("full_4", l1.context_out(context))
+    w_new.canonicalize()
+    w_new.compile_latex("full_4", l1.context_out(context))

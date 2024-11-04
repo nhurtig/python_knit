@@ -4,8 +4,9 @@ and canonicalization of braids
 """
 
 from __future__ import annotations
-from typing import Callable, Sequence
+from typing import Callable, List, Sequence, Iterator, Tuple
 from braid.braid_generator import BraidGenerator
+from braid.sage import canonicalize_braid
 from category.object import PrimitiveObject
 from fig_gen.latex import Latex
 
@@ -23,7 +24,6 @@ class Braid(Latex):
     def __init__(self, n: int) -> None:
         self.__n = n
         self.__gens: list[BraidGenerator] = []
-        self.__iter_index: int = -1
 
     def copy(self) -> Braid:
         """Returns a copy of this braid.
@@ -57,20 +57,31 @@ class Braid(Latex):
             b.append(g)
         return b
 
-    # def set_gens(self, gens: list[BraidGenerator]) -> None:
-    #     """Sets the generators of this braid word; expects
-    #     braid word to be empty to start.
+    def canon(self) -> Braid:
+        """Returns the braid in canonical form
+        that is equivalent to this braid"""
+        out = canonicalize_braid(self.n(), [g.to_sage() for g in self.__gens])
+        return Braid.from_sage(out, self.n())
 
-    #     Args:
-    #         gens (list[BraidGenerator]): new generators
+    @staticmethod
+    def from_sage(sage_out: List[Tuple[str, int]], n: int) -> Braid:
+        """Makes a braid from sagemath's output. See sage.py for how
+        this output is preprocessed
 
-    #     Raises:
-    #         WordNotEmptyException: if the word is not empty
-    #             to begin with
-    #     """
-    #     if self.__gens != []:
-    #         raise WordNotEmptyException()
-    #     self.__gens = gens
+        Args:
+            sage_out (List[Tuple[str, int]]): Syllables of the word
+            n (int): Number of strands
+
+        Returns:
+            Braid: Braid representing the sagemath output
+        """
+        b = Braid(n)
+        for name, power in sage_out:
+            i = int(name[1:]) if n > 2 else 0
+            pos = power > 0
+            for _ in range(abs(power)):
+                b.append(BraidGenerator(i, pos))
+        return b
 
     def n(self) -> int:
         """Simple get function
@@ -79,241 +90,6 @@ class Braid(Latex):
             int: number of strands of the braid word
         """
         return self.__n
-
-    @staticmethod
-    def delta(n: int, pos: bool = True) -> Braid:
-        """Constructs the delta braid
-        on n strands
-
-        Args:
-            n (int): Number of strands
-            pos (bool, optional): Whether the
-            crossings are positive. Defaults to True.
-
-        Returns:
-            Braid: Delta braid
-        """
-        d = Braid(n)
-        for i in range(n - 1, -1, -1):
-            # strand 0 to index i
-            for j in range(i):
-                d.append(BraidGenerator(j, pos))
-        return d
-
-    def left_gcd(self, other: Braid) -> Braid:
-        """Computes the left GCD of this braid
-        and the other one.
-
-        Args:
-            other (Braid): Braid to compute
-            GCD with
-
-        Raises:
-            StrandMismatchException: self and other
-            have different amount of strands
-
-        Returns:
-            Braid: Maximal braid x such that
-            there exists y such that x y = self
-            and y' such that x y' = other
-        """
-        if self.n() != other.n():
-            raise StrandMismatchException()
-
-        gcd = Braid(self.__n)
-
-        for i in range(self.n() - 1):
-            g1 = Braid(self.n())
-            g1.append(BraidGenerator(i, False))
-            g1.concat(self)
-
-            (self_quotient, leftovers) = g1.reverse()
-
-            if len(list(leftovers)) != 0:
-                continue
-
-            g2 = Braid(self.n())
-            g2.append(BraidGenerator(i, False))
-            g2.concat(other)
-
-            (other_quotient, leftovers) = g2.reverse()
-
-            if len(list(leftovers)) != 0:
-                continue
-
-            sub_gcd = self_quotient.left_gcd(other_quotient)
-            gcd.append(BraidGenerator(i, True))
-            for g in sub_gcd:
-                gcd.append(g)
-            return gcd
-
-        return gcd
-
-    def head(self) -> Braid:
-        """Computes the head, or
-        alpha, of the braid
-
-        Returns:
-            Braid: Largest simple
-            divisor of self
-        """
-        return self.left_gcd(Braid.delta(self.n()))
-
-    def __check_compatible(self, other: Braid) -> None:
-        """Raises an exception when the braids can't
-            be concatenated; otherwise does nothing
-
-        Args:
-            other (Braid): Braid to check compatibility with
-
-        Raises:
-            StrandMismatchException: when braids can't be
-                concatenated
-        """
-        if self.n() != other.n():
-            raise StrandMismatchException()
-
-    def concat(self, second: Braid) -> None:
-        """Appends one braid to the other,
-        mutating in place
-
-        Args:
-            next (Braid): the second braid to be added
-
-        Raises:
-            StrandMismatchException: when the
-                braids don't line up in their n
-        """
-        self.__check_compatible(second)
-        self.__gens.extend(second)
-
-    def reverse(self) -> tuple[Braid, Braid]:
-        """Puts a braid word into its reversed
-        form; returns braid words
-        that make it up
-
-        Returns:
-            tuple[Braid, Braid]: (x, y) where
-            x is all pos, y is all neg, and x * y
-            is the original
-        """
-        while True:
-            for gen_index, g1 in enumerate(self):
-                if gen_index + 1 == len(self.__gens):
-                    continue
-                g2 = self.__gens[gen_index + 1]
-                if not g1.pos() and g2.pos():
-                    i = g1.i()
-                    j = g2.i()
-
-                    prefix = self.__gens[:gen_index]
-                    middle = Braid.reverse_helper(i, j)
-                    suffix = self.__gens[gen_index + 2 :]
-
-                    self.__gens = prefix + middle + suffix
-                    break  # break the for loop, doesn't
-                    # go to else, while True makes
-                    # this go to next loop
-            else:
-                # for wasn't broken; no swaps
-                # were made
-                break  # break the while True
-
-        leading_pos = Braid(self.n())
-        ending_neg = Braid(self.n())
-
-        for gen in self:
-            if gen.pos():
-                leading_pos.append(gen)
-            else:
-                ending_neg.append(gen)
-
-        return (leading_pos, ending_neg)
-
-    def reverse_gens(self) -> None:
-        """Reverses the order of
-        generators in the braid word
-        """
-        self.__gens.reverse()
-
-    def invert_gens(self) -> None:
-        """Inverts each of the generators,
-        but doesn't change their order
-        """
-        for i, g in enumerate(self.__gens):
-            self.__gens[i] = BraidGenerator(g.i(), not g.pos())
-
-    def invert(self) -> None:
-        """Converts into the exact inverse
-        of the given braid word
-        """
-        self.reverse_gens()
-        self.invert_gens()
-
-    def simple_perm(self, ignore: bool = False) -> list[int]:
-        """Converts to a permutation.
-        Raises NotSimpleError if
-        this list doesn't represent a permutation
-        and ignore is False
-
-        Args:
-            ignore (bool): default False to
-            raise NotSimpleError when not simple;
-            True to ignore errors
-
-        Raises:
-            NotSimpleError: Raised if
-            the braid isn't simple and
-            ignore is False
-
-        Returns:
-            list[int]: image of the permutation
-            if the braid is simple or ignore
-            is True
-        """
-        perm: list[int] = list(range(self.n()))
-        crossings: set[int] = set()
-        for g in self:
-            if not ignore and not g.pos():
-                raise NotSimpleError()
-            over = perm.index(g.i())
-            under = perm.index(g.i() + 1)
-
-            key = over * self.n() + under
-            if not ignore and key in crossings:
-                raise NotSimpleError()
-            crossings.add(key)
-
-            perm[over] = g.i() + 1
-            perm[under] = g.i()
-
-        return perm
-
-    @staticmethod
-    def reverse_helper(i: int, j: int) -> list[BraidGenerator]:
-        """Rewrites sigma_i^{-1} sigma_j
-        according to reversing rules
-
-        Args:
-            i (int): index of first, inverse
-            j (int): index of second, noninverse
-
-        Returns:
-            list[BraidGenerator]: new reversed word
-            equivalent to the original
-        """
-        match abs(i - j):
-            case 0:
-                return []
-            case 1:
-                return [
-                    BraidGenerator(j, True),
-                    BraidGenerator(i, True),
-                    BraidGenerator(j, False),
-                    BraidGenerator(i, False),
-                ]
-            case _:
-                return [BraidGenerator(j, True), BraidGenerator(i, False)]
 
     def __check_gen_valid(self, gen: BraidGenerator) -> None:
         """Raises an exception when the gen can't go in
@@ -445,19 +221,17 @@ class Braid(Latex):
                 self.__gens.insert(i, BraidGenerator(j, first_inv))
                 self.__gens.insert(i, BraidGenerator(j, not first_inv))
 
-    def __iter__(self) -> Braid:
-        self.__iter_index = 0
-        return self
+    def __iter__(self) -> Iterator[BraidGenerator]:
+        return iter(self.__gens)
 
-    def __next__(self) -> BraidGenerator:
-        if self.__iter_index >= len(self.__gens):
-            raise StopIteration
-        next_gen = self.__gens[self.__iter_index]
-        self.__iter_index += 1
-        return next_gen
+    def __len__(self) -> int:
+        return len(self.__gens)
 
     def __repr__(self) -> str:
         return f"Braid(n={self.__n}, {self.__gens})"
+
+    def __str__(self) -> str:
+        return "".join([str(g) for g in self])
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Braid):
@@ -481,7 +255,7 @@ class Braid(Latex):
         return str_latex
 
     def latex_height(self) -> int:
-        return max(len(list(self)), 1)
+        return max(len(self), 1)
 
     def context_out(
         self, context: Sequence[PrimitiveObject]

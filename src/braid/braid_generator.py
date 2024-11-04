@@ -39,6 +39,11 @@ class BraidGenerator(Latex):
         """
         return self.__sign.pos()
 
+    def to_sage(self) -> int:
+        """Returns a sage representation of
+        this generator"""
+        return (self.__i + 1) * (1 if self.__sign.pos() else -1)
+
     @staticmethod
     def from_char(c: str) -> BraidGenerator:
         """Converts an alphabetic character to
@@ -63,6 +68,9 @@ class BraidGenerator(Latex):
         return BraidGenerator(i, c.islower())
 
     def __repr__(self) -> str:
+        return str((self.i(), self.__sign.pos()))
+
+    def __str__(self) -> str:
         return chr(ord("a" if self.pos() else "A") + self.i())
 
     def __eq__(self, other: object) -> bool:

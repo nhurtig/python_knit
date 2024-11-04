@@ -6,7 +6,7 @@ from category.morphism import Knit
 from category.object import Carrier, Loop
 from common.common import Bed, Dir
 from layer.layer import Layer
-from src.layer.word import CanonWord, Word
+from src.layer.word import Word
 
 b0 = Braid.str_to_braid(0, "")
 l1 = Loop(0)
@@ -38,20 +38,16 @@ word.append_layer(lay23)
 def test_basic_example() -> None:
     """Checks that the canonicalization
     of a small word (3 layers) is correct"""
-    can_word = CanonWord(word)
+    can_word = word.copy()
+    can_word.canonicalize()
     out = str(can_word)
-    assert (
-        out
-        == """\taab
-[slurped, c, l]
-back left
-[l, c]
-\tABAABAaabba
-[l, l, c]
-back right
-[c, l]
-\t
-[c, l]
-back left
-[slurped]"""
+
+    assert out == (
+        """Word([Layer(Knit(front=False, right=False:Braid(n=2, [])), """
+        """Layer(Knit(front=False, right=True:Braid(n=3, """
+        """[(0, False), (1, False), (0, False), (0, False), """
+        """(1, False), (0, False), (0, True), (0, True), """
+        """(1, True), (1, True), (0, True)])), """
+        """Layer(Knit(front=False, right=False:Braid(n=3, """
+        """[(0, True), (0, True), (1, True)]))])"""
     )
