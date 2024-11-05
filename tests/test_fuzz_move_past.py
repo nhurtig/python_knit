@@ -68,28 +68,47 @@ def test_braid_fuzzing_preserves_equivalence() -> None:
         bottom_index = 0
         top_index = 0
         while (
-            bottom_index + bottom_outs > n # too big
-            or top_index + top_ins > n # too big
+            bottom_index + bottom_outs > n  # too big
+            or top_index + top_ins > n  # too big
             or (
                 bottom_index < top_index + top_ins
-                and top_index < bottom_index + bottom_outs # overlap
+                and top_index < bottom_index + bottom_outs  # overlap
             )
-            or n - bottom_outs + bottom_ins <= 2 # bottomest box needs 2 outputs
+            or n - bottom_outs + bottom_ins <= 2  # bottomest box needs 2 outputs
         ):
-            n = geometric(N_AVERAGE - 4) + 4 # at least 4 strands
+            n = geometric(N_AVERAGE - 4) + 4  # at least 4 strands
             bottom_ins = geometric(AVERAGE_OUTIN)
-            bottom_outs = geometric(AVERAGE_OUTIN - 2) + 2 # ensure >= 2 out
-            top_ins = geometric(AVERAGE_OUTIN - 2) + 2 # ensure >= 2 in (for vertical flip)
-            top_outs = geometric(AVERAGE_OUTIN - 2) + 2 # so we can canonicalize
+            bottom_outs = geometric(AVERAGE_OUTIN - 2) + 2  # ensure >= 2 out
+            top_ins = (
+                geometric(AVERAGE_OUTIN - 2) + 2
+            )  # ensure >= 2 in (for vertical flip)
+            top_outs = geometric(AVERAGE_OUTIN - 2) + 2  # so we can canonicalize
             bottom_index = int(rng() * n)
             top_index = int(rng() * n)
 
         context_in = [Loop(i) for i in range(n - bottom_outs + bottom_ins)]
         bottom_box = Knit(
-            Bed(rng() < 0.5), Dir(rng() < 0.5), context_in[bottom_index:bottom_index+bottom_ins], [Loop(i+n-bottom_outs+bottom_ins) for i in range(bottom_outs)]
+            Bed(rng() < 0.5),
+            Dir(rng() < 0.5),
+            context_in[bottom_index : bottom_index + bottom_ins],
+            [Loop(i + n - bottom_outs + bottom_ins) for i in range(bottom_outs)],
         )
         top_box = Knit(
-            Bed(rng() < 0.5), Dir(rng() < 0.5), context_in[top_index:top_index+top_ins] if top_index < bottom_index else context_in[top_index-bottom_outs+bottom_ins:top_index-bottom_outs+bottom_ins+top_ins], [Loop(i+n*n) for i in range(top_outs)]
+            Bed(rng() < 0.5),
+            Dir(rng() < 0.5),
+            (
+                context_in[top_index : top_index + top_ins]
+                if top_index < bottom_index
+                else context_in[
+                    top_index
+                    - bottom_outs
+                    + bottom_ins : top_index
+                    - bottom_outs
+                    + bottom_ins
+                    + top_ins
+                ]
+            ),
+            [Loop(i + n * n) for i in range(top_outs)],
         )
         # for loop in bottom_box.outs() + bottom_box.ins() + top_box.outs():
         #     pos = rng() < 0.5
@@ -101,11 +120,8 @@ def test_braid_fuzzing_preserves_equivalence() -> None:
         above_braid = Braid(n - top_ins + top_outs)
         middle_braid = Braid(n)
 
-
         # JUST FOR DRAWING
-        bottomest_box = Knit(
-            Bed(True), Dir(True), [], context_in
-        )
+        bottomest_box = Knit(Bed(True), Dir(True), [], context_in)
         bottomest_layer = Layer(0, bottomest_box, below_braid, Braid(0))
 
         bottom_layer = Layer(bottom_index, bottom_box, middle_braid, below_braid)
@@ -118,13 +134,13 @@ def test_braid_fuzzing_preserves_equivalence() -> None:
         original_word.append_layer(top_layer)
 
         # try:
-            # original_word = Word()
-            # original_word.append_layer(bottomest_layer)
-            # original_word.append_layer(bottom_layer)
-            # original_word.append_layer(top_layer)
-            # original_word.compile_latex(f"{i}_1_orig")
+        # original_word = Word()
+        # original_word.append_layer(bottomest_layer)
+        # original_word.append_layer(bottom_layer)
+        # original_word.append_layer(top_layer)
+        # original_word.compile_latex(f"{i}_1_orig")
         # except subprocess.CalledProcessError as e:
-            # print(e)
+        # print(e)
 
         original_word_keepsafe = original_word.copy()
         original_word_keepsafe.canonicalize()
@@ -175,8 +191,13 @@ def test_braid_fuzzing_preserves_equivalence() -> None:
         # except subprocess.CalledProcessError as e:
         #     print(e)
         # top_layer = top_layer.flip_canonicalize_delta()
-        top_layer = top_layer.flip_canonicalize()
-        bottom_layer = Layer(bottom_layer.left(), bottom_layer.middle(), top_layer.below(), bottom_layer.below())
+        top_layer = top_layer.flip_macro()
+        bottom_layer = Layer(
+            bottom_layer.left(),
+            bottom_layer.middle(),
+            top_layer.below(),
+            bottom_layer.below(),
+        )
 
         # H2 check
         assert len(bottom_layer.macro_subbraid().canon()) == 0
@@ -209,8 +230,8 @@ def test_braid_fuzzing_preserves_equivalence() -> None:
             assert False
 
         # if not old_left == new_left:
-            # fails += 1
-            # assert False
+        # fails += 1
+        # assert False
 
         # BEGIN VALIDITY TEST
         # new_word = Word()

@@ -150,6 +150,41 @@ class Braid(Latex):
 
         self.__gens = [before] + self.__gens
 
+    def __check_compatible(self, other: Braid) -> None:
+        """Raises an exception when the braids can't
+            be concatenated; otherwise does nothing
+
+        Args:
+            other (Braid): Braid to check compatibility with
+
+        Raises:
+            StrandMismatchException: when braids can't be
+                concatenated
+        """
+        if self.n() != other.n():
+            raise StrandMismatchException()
+
+    def extend(self, after: Braid) -> None:
+        """Extends this braid with another's
+        generators
+
+        Args:
+            after (Braid): Braid to add after self
+        """
+        self.__check_compatible(after)
+        self.__gens.extend(list(after))
+
+    def intend(self, before: Braid) -> None:
+        """Adds the supplied braid's generators
+        before this one's
+
+        Args:
+            before (Braid): Braid to add before self
+        """
+        self.__check_compatible(before)
+        # TODO: this is why it'd be nice to use linked lists
+        self.__gens = list(before) + self.__gens
+
     def subbraid(self, keep: set[int]) -> Braid:
         """Computes and returns a subbraid of
         this braid

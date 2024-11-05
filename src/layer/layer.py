@@ -5,13 +5,14 @@ class and how to canonicalize them into CanonLayers
 """
 
 from __future__ import annotations
-from typing import Callable, Dict, Sequence
+from typing import Callable, Dict, Sequence, Set
 from braid.braid import Braid
 from braid.braid_generator import BraidGenerator
 from category.morphism import Knit
 from category.object import PrimitiveObject
 from common.common import Dir, Sign
 from fig_gen.latex import Latex
+from layer.layer_emit import LayerEmit
 
 
 class Layer(Latex):
@@ -19,41 +20,58 @@ class Layer(Latex):
     above and below
     """
 
-    def __init__(self, left: int, middle: Knit, above: Braid, below: Braid) -> None:
+    def __init__(self, left: int, middle: Knit, right: int) -> None:
         self.__left = left
         self.__middle = middle
-        # TODO: check that n() of above, below match left, mid, right
-        self.__above = above
-        self.__below = below
+        self.__right = right
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Layer):
             return False
-        return (
-            self.left() == other.left()
-            and self.middle() == other.middle()
-            and self.above() == other.above()
-        )
+        return self.left() == other.left() and self.middle() == other.middle()
 
-    def copy(self, below: Braid, copied_object_dict: Dict[PrimitiveObject, PrimitiveObject]) -> tuple[Layer, Braid]:
-        """Copies the layer. Takes the below braid
-        of the copied layer and returns the copy of
-        the above braid. This is so Words can have their
-        Layers share braids.
-
-        Args:
-            below (Braid): Already-copied below braid
+    def identity_emit(self) -> LayerEmit:
+        """Constructs the identity LayerEmit for
+        this layer's above and below strands
 
         Returns:
-            tuple[Layer, Braid]: Copied layer, that layers'
-            above braid
+            LayerEmit: identity emit
         """
-        above_copy = self.__above.copy()
-        l = Layer(self.left(), self.middle().copy(copied_object_dict), above_copy, below)
-        return (l, above_copy)
+        return LayerEmit(self.n_below(), self.n_above())
+
+    def copy(self, copied_object_dict: Dict[PrimitiveObject, PrimitiveObject]) -> Layer:
+        """Copies the layer.
+
+        Args:
+            copied_object_dict (Dict[PrimitiveObject, PrimitiveObject]): Dictionary
+            of already-copied primitives to maintain connections
+
+        Returns:
+            Layer: copy of this layer
+        """
+        l = Layer(self.left(), self.middle().copy(copied_object_dict), self.right())
+        return l
 
     def __repr__(self) -> str:
-        return f"Layer({repr(self.__middle)}:{repr(self.__above)})"
+        return f"Layer({self.__left}:{repr(self.__middle)}):{self.__right}"
+
+    def n_above(self) -> int:
+        """Calculates how many strands are above
+        this layer
+
+        Returns:
+            int: Number of strands above this layer
+        """
+        return self.__left + len(self.__middle.outs()) + self.__right
+
+    def n_below(self) -> int:
+        """Calculates how many strands are below
+        this layer
+
+        Returns:
+            int: Number of strands below this layer
+        """
+        return self.__left + len(self.__middle.ins()) + self.__right
 
     def left(self) -> int:
         """Getter
@@ -63,6 +81,14 @@ class Layer(Latex):
         """
         return self.__left
 
+    def right(self) -> int:
+        """Getter
+
+        Returns:
+            int: Count of identity strands right of the box
+        """
+        return self.__right
+
     def middle(self) -> Knit:
         """Getter
 
@@ -71,39 +97,35 @@ class Layer(Latex):
         """
         return self.__middle
 
-    def macro_subbraid(self) -> Braid:
+    def macro_subset(self) -> Set[int]:
         """Gets the macro subbraid (identity
-        braids and the primary loop) above
-        the box from this layer
+        braids and the primary loop)'s braid
+        indices for above this box
 
         Returns:
-            Braid: macro subbraid
+            Set[int]: macro subbraid indices
         """
         keep = set()
-        for i in range(self.__above.n()):
+        for i in range(self.n_above()):
             if i < self.__left:
                 keep.add(i)
             elif i >= self.__left + len(self.__middle.outs()):
                 keep.add(i)
         keep.add(self.__left + self.__middle.primary_index())
 
-        return self.__above.subbraid(keep)
+        return keep
 
-    def below(self) -> Braid:
-        """Getter
+    def macro_subbraid(self, above: Braid) -> Braid:
+        """Computes the above macro subbraid of this
+        layer, given the above braid
 
-        Returns:
-            Braid: Below braid
-        """
-        return self.__below
-
-    def above(self) -> Braid:
-        """Getter
+        Args:
+            above (Braid): above braid
 
         Returns:
-            Braid: above braid
+            Braid: macro subbraid of above
         """
-        return self.__above
+        return above.subbraid(self.macro_subset())
 
     def primary_twists(self) -> int:
         """Returns the number of times
@@ -117,14 +139,20 @@ class Layer(Latex):
         """
         return self.__middle.primary().twists()
 
-    def delta(self, sign: Sign) -> None:
+    def delta(self, sign: Sign) -> LayerEmit:
         """Delta conjugates the box
 
         Args:
             sign (Sign): Sign of the
             twist (and the delta) above
             the box
+
+        Returns:
+            LayerEmit: Emitted braids from
+            this op
         """
+        emit = self.identity_emit()
+
         self.__middle.flip()
         i = self.__left
         n = len(self.__middle.outs())
@@ -134,7 +162,7 @@ class Layer(Latex):
         for j in range(i, i + n):
             # take strand i to index j
             for k in range(j - 1, i - 1, -1):
-                self.__above.prepend(BraidGenerator(k, sign.pos()))
+                emit.emit_above(BraidGenerator(k, sign.pos()))
 
         m = len(self.__middle.ins())
         for j in range(m):
@@ -143,9 +171,11 @@ class Layer(Latex):
         for j in range(i + m - 1, i - 1, -1):
             # take strand i to index j
             for k in range(i, j):
-                self.__below.append(BraidGenerator(k, not sign.pos()))
+                emit.emit_below(BraidGenerator(k, not sign.pos()))
 
-    def sigma_conj(self, i: int, sign: Sign) -> None:
+        return emit
+
+    def sigma_conj(self, i: int, sign: Sign) -> LayerEmit:
         """Performs the sigma conjugation rule on either
         side of this layer's box
 
@@ -155,6 +185,10 @@ class Layer(Latex):
 
         Raises:
             ValueError: i is too near the box
+
+        Returns:
+            LayerEmit: Emitted braids from
+            this op
         """
         if i in [self.__left - 1, self.__left]:
             raise ValueError
@@ -166,10 +200,13 @@ class Layer(Latex):
             above_i = i + len(self.__middle.outs()) - 1
             below_i = i + len(self.__middle.ins()) - 1
 
-        self.__above.prepend(BraidGenerator(above_i, sign.pos()))
-        self.__below.append(BraidGenerator(below_i, not sign.pos()))
+        emit = self.identity_emit()
+        emit.emit_above(BraidGenerator(above_i, sign.pos()))
+        emit.emit_below(BraidGenerator(below_i, not sign.pos()))
 
-    def underline_conj(self, d: Dir, above: bool) -> None:
+        return emit
+
+    def underline_conj(self, d: Dir, above: bool) -> LayerEmit:
         """Performs the underline conj rule on either side
         of this layer's box
 
@@ -178,32 +215,39 @@ class Layer(Latex):
             the box (was to the "dir" of the box)
             above (bool): Whether the strand goes above
             the box's inputs and outputs or not
+
+        Returns:
+            LayerEmit: Emitted braids from
+            this op
         """
         i = self.__left
         n = len(self.__middle.outs())
         m = len(self.__middle.ins())
 
+        emit = self.identity_emit()
         match d.right():
             case False:
                 sign = not above
                 for j in range(i - 1, i + n - 1):
-                    self.__above.prepend(BraidGenerator(j, sign))
+                    emit.emit_above(BraidGenerator(j, sign))
 
                 sign = not sign
                 for j in range(i - 1, i + m - 1):
-                    self.__below.append(BraidGenerator(j, sign))
+                    emit.emit_below(BraidGenerator(j, sign))
 
                 self.__left -= 1
             case True:
                 sign = above
                 for j in range(i + n - 1, i - 1, -1):
-                    self.__above.prepend(BraidGenerator(j, sign))
+                    emit.emit_above(BraidGenerator(j, sign))
 
                 sign = not sign
                 for j in range(i + m - 1, i - 1, -1):
-                    self.__below.append(BraidGenerator(j, sign))
+                    emit.emit_below(BraidGenerator(j, sign))
 
                 self.__left += 1
+
+        return emit
 
     def flip_vertical(self) -> Layer:
         """Returns a Layer that represents this
@@ -213,79 +257,85 @@ class Layer(Latex):
         Returns:
             Layer: flipped layer
         """
-        return Layer(self.left(), self.middle().flip_vertical(), self.below().flip_vertical(), self.above().flip_vertical())
+        return Layer(self.left(), self.middle().flip_vertical(), self.right())
 
-    def flip_canonicalize(self) -> Layer:
-        """Canonicalizes this layer while
-        "facing upside down"
+    def flip_macro(self, below: Braid) -> LayerEmit:
+        """Does the macro substep of canonicalization
+        on this layer while "facing upside down"
+
+        Args:
+            below (Braid): below braid, not flipped yet
 
         Returns:
-            Layer: layer that's equivalent to this
+            LayerEmit: layer that's equivalent to this
             layer in a looking-down canonical form
         """
         upside_down = self.flip_vertical()
-        # upside_down.canonicalize()
-        # TODO: revert to make layerCanon happen?
-        upside_down.macro_step()
-        return upside_down.flip_vertical()
+        emit = upside_down.macro_step(below.flip_vertical())
+        return emit.flip_vertical()
 
-    def flip_canonicalize_delta(self) -> Layer:
-        """Canonicalizes this layer while
-        "facing upside down"
-
-        Returns:
-            Layer: layer that's equivalent to this
-            layer in a looking-down canonical form
-        """
-        # TODO: this is terrible. Change it back
-        upside_down = self.flip_vertical()
-        # upside_down.canonicalize()
-        # TODO: revert to make layerCanon happen?
-        upside_down.delta_step()
-        return upside_down.flip_vertical()
-
-
-    def canonicalize(self) -> None:
+    def canonicalize(self, above: Braid) -> LayerEmit:
         """Canonicalizes this layer, mutating
-        it in place"""
-        self.delta_step()
-        self.macro_step()
-        self.layer_canon()
+        it in place. Does not do any braid canonicalization
 
-    def delta_step(self) -> None:
+        Args:
+            above (Braid): braid that's above
+            this layer (for macro)
+
+        Returns:
+            LayerEmit: Emitted braids from
+            this op
+        """
+        emit = self.macro_step(above)
+        emit.extend(self.delta_step())
+        return emit
+
+    def delta_step(self) -> LayerEmit:
         """Performs the delta step of the algorithm
         on this layer, mutating it in place
+
+        Returns:
+            LayerEmit: Emitted braids from
+            this op
         """
+        emit = self.identity_emit()
         while self.primary_twists() != 0:
             sign = self.primary_twists() < 0
-            self.delta(Sign(sign))
+            emit.extend(self.delta(Sign(sign)))
+        return emit
 
-    def macro_step(self) -> None:
+    def macro_step(self, above: Braid) -> LayerEmit:
         """Performs the macro step of the algorithm
         on this layer, mutating it in place
+
+        Returns:
+            LayerEmit: Emitted braids from
+            this op
         """
-        for gen in self.macro_subbraid():
+        emit = self.identity_emit()
+        for gen in self.macro_subbraid(above):
             if gen.i() == self.left() - 1:
-                self.underline_conj(Dir(False), gen.pos())
+                emit.extend(self.underline_conj(Dir(False), gen.pos()))
             elif gen.i() == self.left():
-                self.underline_conj(Dir(True), not gen.pos())
+                emit.extend(self.underline_conj(Dir(True), not gen.pos()))
             else:
-                self.sigma_conj(gen.i(), Sign(not gen.pos()))
+                emit.extend(self.sigma_conj(gen.i(), Sign(not gen.pos())))
+        return emit
 
-    def layer_canon(self) -> None:
-        """Canonicalizes the above braid of this
-        layer, mutating it in place"""
-        self.__above.reset_to(self.__above.canon())
-
-    def fuzz_layer(self, rng: Callable[[], float], steps: int) -> None:
+    def fuzz_layer(self, rng: Callable[[], float], steps: int) -> LayerEmit:
         """Fuzzes this layer by performing layer operations; doesn't
         fuzz either braid
 
         Args:
             rng (Callable[[], float]): Random number generator
             steps (int): Number of mutations to attempt
+
+        Returns:
+            LayerEmit: Emitted braids from this
+            op
         """
-        num_macro_strands = self.__below.n() - len(self.__middle.ins()) + 1
+        emit = self.identity_emit()
+        num_macro_strands = self.n_below() - len(self.__middle.ins()) + 1
         for _ in range(steps):
             r = rng()
             if r < 0.3:
@@ -293,7 +343,7 @@ class Layer(Latex):
                 i = int(rng() * (num_macro_strands - 1))
                 if i in [self.__left, self.__left - 1]:
                     continue  # can't sigma conj here
-                self.sigma_conj(i, Sign(rng() < 0.5))
+                emit.extend(self.sigma_conj(i, Sign(rng() < 0.5)))
             elif r < 0.85:
                 # underline conj
                 right = rng() < 0.5
@@ -302,22 +352,14 @@ class Layer(Latex):
                     if self.__left == 0:
                         continue
                 else:
-                    if self.__left + len(self.__middle.ins()) == self.__below.n():
+                    if self.__left + len(self.__middle.ins()) == self.n_below():
                         continue
 
-                self.underline_conj(Dir(right), rng() < 0.5)
+                emit.extend(self.underline_conj(Dir(right), rng() < 0.5))
             else:
                 # delta conj
-                self.delta(Sign(rng() < 0.5))
-
-    def fuzz_braid(self, rng: Callable[[], float], steps: int) -> None:
-        """Fuzzes the above braid using its fuzzing algorithm
-
-        Args:
-            rng (Callable[[], float]): Random number generator
-            steps (int): Number of mutations
-        """
-        self.__above.fuzz(rng, steps)
+                emit.extend(self.delta(Sign(rng() < 0.5)))
+        return emit
 
     def to_latex(self, x: int, y: int, context: Sequence[PrimitiveObject]) -> str:
         str_latex = ""
@@ -341,24 +383,16 @@ class Layer(Latex):
                     x + i + len(self.__middle.outs()) - len(self.__middle.ins())}}}{{{y+j}}}
 {{{len(self.__middle.outs()) - len(self.__middle.ins()) if j == 0 else 0}}}
 {{{o}}}{{{r}}}{{{g}}}{{{b}}}\n"""
-
-        str_latex += self.__above.to_latex(
-            x,
-            y + box_height,
-            list(context[: self.__left])
-            + list(self.__middle.context_out(box_context_in))
-            + list(context[self.__left + len(self.__middle.ins()) :]),
-        )
         return str_latex
 
     def latex_height(self) -> int:
-        return self.__middle.latex_height() + self.__above.latex_height()
+        return self.__middle.latex_height()
 
     def context_out(
         self, context: Sequence[PrimitiveObject]
     ) -> Sequence[PrimitiveObject]:
         box_context_in = context[self.__left : self.__left + len(self.__middle.ins())]
-        return self.__above.context_out(
+        return (
             list(context[: self.__left])
             + list(self.__middle.context_out(box_context_in))
             + list(context[self.__left + len(self.__middle.ins()) :])

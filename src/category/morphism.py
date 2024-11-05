@@ -70,7 +70,12 @@ class Knit(Latex):
         Returns:
             Knit: A copy of the Knit
         """
-        return Knit(self.__bed, self.__dir, [o.copy(copied_object_dict) for o in self.__ins], [o.copy(copied_object_dict) for o in self.__outs])
+        return Knit(
+            self.__bed,
+            self.__dir,
+            [o.copy(copied_object_dict) if o is not None else None for o in self.__ins],
+            [o.copy(copied_object_dict) if o is not None else None for o in self.__outs],
+        )
 
     def to_latex(self, x: int, y: int, context: Sequence[PrimitiveObject]) -> str:
         latex_str = ""
@@ -172,9 +177,7 @@ class Knit(Latex):
         return i
 
     def __repr__(self) -> str:
-        return (
-            f"Knit(front={repr(self.__bed.front())}, right={repr(self.__dir.right())}"
-        )
+        return f"Knit(front={repr(self.__bed.front())}, right={repr(self.__dir.right())}, ins={len(self.__ins)}, outs={len(self.__outs)})"
 
     def __str__(self) -> str:
         return f"""[{", ".join(["slurped" if o is None else str(o) for o in self.__outs])}]

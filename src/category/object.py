@@ -26,7 +26,9 @@ class PrimitiveObject(ABC):
         return self.__id
 
     @abstractmethod
-    def copy(self, copied_object_dict: Dict[PrimitiveObject, PrimitiveObject]) -> PrimitiveObject:
+    def copy(
+        self, copied_object_dict: Dict[PrimitiveObject, PrimitiveObject]
+    ) -> PrimitiveObject:
         """Copies this object
 
         Returns:
@@ -65,7 +67,9 @@ class Carrier(PrimitiveObject):
     """Carrier yarn; a single thread. Doesn't
     keep track of twists; is always untwisted"""
 
-    def copy(self, copied_object_dict: Dict[PrimitiveObject, PrimitiveObject]) -> PrimitiveObject:
+    def copy(
+        self, copied_object_dict: Dict[PrimitiveObject, PrimitiveObject]
+    ) -> PrimitiveObject:
         if self in copied_object_dict:
             return copied_object_dict[self]
         c = Carrier(self.id())
@@ -96,7 +100,9 @@ class Loop(PrimitiveObject):
         super().__init__(identity)
         self.__twists: int = 0
 
-    def copy(self, copied_object_dict: Dict[PrimitiveObject, PrimitiveObject]) -> PrimitiveObject:
+    def copy(
+        self, copied_object_dict: Dict[PrimitiveObject, PrimitiveObject]
+    ) -> PrimitiveObject:
         if self in copied_object_dict:
             return copied_object_dict[self]
         l = Loop(self.id())
@@ -115,7 +121,11 @@ class Loop(PrimitiveObject):
         return "l"
 
     def __eq__(self, other: object) -> bool:
-        return isinstance(other, Loop) and self.id() == other.id() and self.__twists == other.twists()
+        return (
+            isinstance(other, Loop)
+            and self.id() == other.id()
+            and self.__twists == other.twists()
+        )
 
     def __hash__(self) -> int:
         return self.id() * 2 + 1
