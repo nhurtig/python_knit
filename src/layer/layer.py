@@ -5,7 +5,7 @@ class and how to canonicalize them into CanonLayers
 """
 
 from __future__ import annotations
-from typing import Callable, Sequence
+from typing import Callable, Dict, Sequence
 from braid.braid import Braid
 from braid.braid_generator import BraidGenerator
 from category.morphism import Knit
@@ -35,7 +35,7 @@ class Layer(Latex):
             and self.above() == other.above()
         )
 
-    def copy(self, below: Braid) -> tuple[Layer, Braid]:
+    def copy(self, below: Braid, copied_object_dict: Dict[PrimitiveObject, PrimitiveObject]) -> tuple[Layer, Braid]:
         """Copies the layer. Takes the below braid
         of the copied layer and returns the copy of
         the above braid. This is so Words can have their
@@ -49,7 +49,7 @@ class Layer(Latex):
             above braid
         """
         above_copy = self.__above.copy()
-        l = Layer(self.left(), self.middle().copy(), above_copy, below)
+        l = Layer(self.left(), self.middle().copy(copied_object_dict), above_copy, below)
         return (l, above_copy)
 
     def __repr__(self) -> str:
@@ -205,6 +205,46 @@ class Layer(Latex):
 
                 self.__left += 1
 
+    def flip_vertical(self) -> Layer:
+        """Returns a Layer that represents this
+        layer flipped upside down (not rotated,
+        instead reflected)
+
+        Returns:
+            Layer: flipped layer
+        """
+        return Layer(self.left(), self.middle().flip_vertical(), self.below().flip_vertical(), self.above().flip_vertical())
+
+    def flip_canonicalize(self) -> Layer:
+        """Canonicalizes this layer while
+        "facing upside down"
+
+        Returns:
+            Layer: layer that's equivalent to this
+            layer in a looking-down canonical form
+        """
+        upside_down = self.flip_vertical()
+        # upside_down.canonicalize()
+        # TODO: revert to make layerCanon happen?
+        upside_down.macro_step()
+        return upside_down.flip_vertical()
+
+    def flip_canonicalize_delta(self) -> Layer:
+        """Canonicalizes this layer while
+        "facing upside down"
+
+        Returns:
+            Layer: layer that's equivalent to this
+            layer in a looking-down canonical form
+        """
+        # TODO: this is terrible. Change it back
+        upside_down = self.flip_vertical()
+        # upside_down.canonicalize()
+        # TODO: revert to make layerCanon happen?
+        upside_down.delta_step()
+        return upside_down.flip_vertical()
+
+
     def canonicalize(self) -> None:
         """Canonicalizes this layer, mutating
         it in place"""
@@ -235,7 +275,7 @@ class Layer(Latex):
     def layer_canon(self) -> None:
         """Canonicalizes the above braid of this
         layer, mutating it in place"""
-        self.__above = self.__above.canon()
+        self.__above.reset_to(self.__above.canon())
 
     def fuzz_layer(self, rng: Callable[[], float], steps: int) -> None:
         """Fuzzes this layer by performing layer operations; doesn't
@@ -248,13 +288,13 @@ class Layer(Latex):
         num_macro_strands = self.__below.n() - len(self.__middle.ins()) + 1
         for _ in range(steps):
             r = rng()
-            if r < 0.2:
+            if r < 0.3:
                 # sigma conj
                 i = int(rng() * (num_macro_strands - 1))
                 if i in [self.__left, self.__left - 1]:
                     continue  # can't sigma conj here
                 self.sigma_conj(i, Sign(rng() < 0.5))
-            elif r < 0.6:
+            elif r < 0.85:
                 # underline conj
                 right = rng() < 0.5
                 # Boundary conditions

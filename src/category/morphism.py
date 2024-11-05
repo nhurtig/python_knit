@@ -3,7 +3,7 @@ are black boxes that take some strands
 to other strands"""
 
 from __future__ import annotations
-from typing import Optional, Sequence, TypeGuard
+from typing import Dict, Optional, Sequence, TypeGuard
 from category.object import Loop, PrimitiveObject
 from common.common import Bed, Dir
 from fig_gen.latex import Latex
@@ -38,6 +38,16 @@ class Knit(Latex):
             and self.outs() == other.outs()
         )
 
+    def flip_vertical(self) -> Knit:
+        """Returns a Knit that represents this
+        Knit reflected vertically (across a
+        horizontal axis)
+
+        Returns:
+            Knit: Flipped Knit
+        """
+        return Knit(self.bed(), self.dir(), self.__outs, self.__ins)
+
     def bed(self) -> Bed:
         """Getter
 
@@ -54,13 +64,13 @@ class Knit(Latex):
         """
         return self.__dir
 
-    def copy(self) -> Knit:
+    def copy(self, copied_object_dict: Dict[PrimitiveObject, PrimitiveObject]) -> Knit:
         """Copies this Knit
 
         Returns:
             Knit: A copy of the Knit
         """
-        return Knit(self.__bed, self.__dir, self.__ins.copy(), self.__outs.copy())
+        return Knit(self.__bed, self.__dir, [o.copy(copied_object_dict) for o in self.__ins], [o.copy(copied_object_dict) for o in self.__outs])
 
     def to_latex(self, x: int, y: int, context: Sequence[PrimitiveObject]) -> str:
         latex_str = ""

@@ -15,13 +15,6 @@ MUTANTS_PER_WORD = 5
 MUTATION_ATTEMPTS_PER_WORD = 100
 # Took ~35 seconds with the above settings
 
-print(
-    (
-        f"{len(range(MIN_N, MAX_N+1))*WORDS_PER_N*MUTANTS_PER_WORD} tests, each"
-        f"with {MUTATION_ATTEMPTS_PER_WORD} calls to mutate {LETTERS_PER_WORD} letters"
-    )
-)
-
 rng = random.random
 random.seed(42)
 

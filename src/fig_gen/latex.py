@@ -92,7 +92,7 @@ class Latex(ABC):
         # Compile the .tex file to generate a .pdf in the figs/ directory
         try:
             subprocess.run(
-                ["pdflatex", f"{filename}.tex"], check=True, cwd=figs_directory
+                ["lualatex", f"{filename}.tex"], check=True, cwd=figs_directory
             )
             subprocess.run(
                 [

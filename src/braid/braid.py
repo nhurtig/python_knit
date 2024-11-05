@@ -36,6 +36,23 @@ class Braid(Latex):
             b.append(gen)
         return b
 
+    def reset_to(self, other: Braid) -> None:
+        """Sets this braid's value to the given braid's value"""
+        self.__n = other.n()
+        self.__gens = list(other)
+
+    def flip_vertical(self) -> Braid:
+        """Flips the braid vertically (reflection,
+        not rotation)
+
+        Returns:
+            Braid: Flipped braid
+        """
+        b = Braid(self.n())
+        for gen in reversed(list(self)):
+            b.append(gen)
+        return b
+
     @staticmethod
     def str_to_braid(n: int, s: str) -> Braid:
         """Constructs a braid word
@@ -176,13 +193,19 @@ class Braid(Latex):
         """
         for _ in range(steps):
             if not self.__gens:
-                continue
+                # uncancel a few times
+                for _ in range(self.n()):
+                    i = int(rng() * (len(self.__gens) + 1))
+                    j = int(rng() * (self.n() - 1))
+                    first_inv = rng() < 0.5
+                    self.__gens.insert(i, BraidGenerator(j, first_inv))
+                    self.__gens.insert(i, BraidGenerator(j, not first_inv))
+            else:
+                # Select a random index in the list of generators
+                i = int(rng() * len(self.__gens))
 
-            # Select a random index in the list of generators
-            i = int(rng() * len(self.__gens))
-
-            # Apply a random braid relation at this index
-            self.__fuzz_index(i, rng)
+                # Apply a random braid relation at this index
+                self.__fuzz_index(i, rng)
 
     def __fuzz_index(self, i: int, rng: Callable[[], float]) -> None:
         """Attempts to apply a braid word equivalence at this

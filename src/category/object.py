@@ -4,6 +4,7 @@ twists"""
 
 from __future__ import annotations
 from abc import ABC, abstractmethod
+from typing import Dict
 from fig_gen.color import color_gen
 
 
@@ -23,6 +24,14 @@ class PrimitiveObject(ABC):
             for modeling colors of yarn)
         """
         return self.__id
+
+    @abstractmethod
+    def copy(self, copied_object_dict: Dict[PrimitiveObject, PrimitiveObject]) -> PrimitiveObject:
+        """Copies this object
+
+        Returns:
+            PrimitiveObject: copy of this object
+        """
 
     @abstractmethod
     def twist(self, is_pos: bool) -> None:
@@ -56,6 +65,13 @@ class Carrier(PrimitiveObject):
     """Carrier yarn; a single thread. Doesn't
     keep track of twists; is always untwisted"""
 
+    def copy(self, copied_object_dict: Dict[PrimitiveObject, PrimitiveObject]) -> PrimitiveObject:
+        if self in copied_object_dict:
+            return copied_object_dict[self]
+        c = Carrier(self.id())
+        copied_object_dict[self] = c
+        return c
+
     def twist(self, is_pos: bool) -> None:
         pass
 
@@ -68,6 +84,9 @@ class Carrier(PrimitiveObject):
     def __eq__(self, other: object) -> bool:
         return isinstance(other, Carrier) and self.__id == other.id()
 
+    def __hash__(self) -> int:
+        return self.id() * 2
+
 
 class Loop(PrimitiveObject):
     """Two yarns that are never separated. Keeps
@@ -77,6 +96,15 @@ class Loop(PrimitiveObject):
         super().__init__(identity)
         self.__twists: int = 0
 
+    def copy(self, copied_object_dict: Dict[PrimitiveObject, PrimitiveObject]) -> PrimitiveObject:
+        if self in copied_object_dict:
+            return copied_object_dict[self]
+        l = Loop(self.id())
+        for _ in range(abs(self.__twists)):
+            l.twist(self.__twists > 0)
+        copied_object_dict[self] = l
+        return l
+
     def twist(self, is_pos: bool) -> None:
         self.__twists += 1 if is_pos else -1
 
@@ -85,3 +113,9 @@ class Loop(PrimitiveObject):
 
     def __str__(self) -> str:
         return "l"
+
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, Loop) and self.id() == other.id() and self.__twists == other.twists()
+
+    def __hash__(self) -> int:
+        return self.id() * 2 + 1

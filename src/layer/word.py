@@ -33,10 +33,11 @@ class Word(Latex):
         """
         w = Word()
         layers = list(self)
+        copied_object_dict = {}
         if layers:
             prev_b = layers[0].below()
             for l in layers:
-                (l_copy, new_b) = l.copy(prev_b)
+                (l_copy, new_b) = l.copy(prev_b, copied_object_dict)
                 w.append_layer(l_copy)
                 prev_b = new_b
         return w
