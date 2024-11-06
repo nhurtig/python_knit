@@ -12,6 +12,7 @@ from fig_gen.latex import Latex
 from layer.layer import Layer
 from layer.layer_wrapper import LayerWrapper
 
+
 class Word(Latex):
     """Words are a list of Layers and the
     Braids between them"""
@@ -114,7 +115,7 @@ class Word(Latex):
             below = self.__layers[index]
             above = self.__layers[index + 1]
             if below.swap(above):
-                self.__layers[index:index+2] = [above, below]
+                self.__layers[index : index + 2] = [above, below]
                 self.__braids[index + 1] = Braid(above.n_above())
                 return True
             else:
