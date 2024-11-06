@@ -270,8 +270,62 @@ class Layer(Latex):
         self.flip_vertical()
         emit = self.macro_step(below.flip_vertical())
         self.flip_vertical()
-        # self.__left = upside_down.left()
         return emit.flip_vertical()
+
+    def swap(self, above: Layer) -> bool:
+        """Assuming the braid between is the
+        identity, mutates the layers as if
+        they've been moved past each other
+
+        Args:
+            above (Layer): Layer above this,
+            to be moved below
+
+        Returns:
+            bool: Whether the operation was
+            successful. If False, no mutations
+            were made.
+        """
+        i = self.left()
+        j = above.left()
+        m = len(self.middle().outs())
+        p = len(above.middle().ins())
+        q = len(above.middle().outs())
+        if i + m <= j or j + p <= i:
+            above.move_below(self)
+            if i + m <= j:
+                self.__id_count += q - p
+            elif j + p <= i:
+                self.__left += q - p
+                self.__id_count += q - p
+            else:
+                assert False
+            return True
+        else:
+            return False
+
+    def move_below(self, below: Layer) -> None:
+        """Moves this layer below another,
+        mutating just this layer. Blows up if
+        the layers can't move past each other
+
+        Args:
+            below (Layer): Layer to move below
+        """
+        i = below.left()
+        n = len(below.middle().ins())
+        m = len(below.middle().outs())
+        j = self.left()
+
+        if i + m <= j:
+            self.__left = j + n - m
+            self.__id_count += n - m
+            return
+        p = len(self.middle().ins())
+        if j + p <= i:
+            self.__id_count += n - m
+            return
+        assert False
 
     def canonicalize(self, above: Braid) -> LayerEmit:
         """Canonicalizes this layer, mutating

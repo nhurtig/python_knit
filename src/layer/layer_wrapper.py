@@ -43,9 +43,11 @@ class LayerWrapper:
 
     def canonicalize(self) -> None:
         """Canonicalizes this layer, mutating
-        it in place. Does not do any braid canonicalization
+        it in place. Also canonicalizes the above
+        braid
         """
         self.__apply(self.__layer.canonicalize(self.__above))
+        self.__above.set_canon()
 
     def flip_macro(self) -> None:
         """Does the macro substep of canonicalization

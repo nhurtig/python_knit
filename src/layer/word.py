@@ -12,7 +12,6 @@ from fig_gen.latex import Latex
 from layer.layer import Layer
 from layer.layer_wrapper import LayerWrapper
 
-
 class Word(Latex):
     """Words are a list of Layers and the
     Braids between them"""
@@ -45,7 +44,7 @@ class Word(Latex):
         w.append_braid(self.__braids[-1])
         return w
 
-    def layer_at(self, index: int) -> LayerWrapper:
+    def __layer_at(self, index: int) -> LayerWrapper:
         """Returns a wrapper around the layer at this
         index. The wrapper applies any emitted effects
         to the neighboring braids
@@ -59,17 +58,6 @@ class Word(Latex):
         return LayerWrapper(
             self.__braids[index], self.__layers[index], self.__braids[index + 1]
         )
-
-    def braid_at(self, index: int) -> Braid:
-        """Getter that wraps the braid list
-
-        Args:
-            index (int): Index in the braid list
-
-        Returns:
-            Braid: Braid at that index
-        """
-        return self.__braids[index]
 
     def append_layer(self, l: Layer) -> None:
         """Adds a layer on top of this word
@@ -95,13 +83,44 @@ class Word(Latex):
     def canonicalize(self) -> None:
         """Canonicalizes the word in place"""
         for i in range(len(self.__layers) - 1, -1, -1):
-            l = self.__layers[i]
-            above = self.__braids[i + 1]
-            below = self.__braids[i]
-            emit = l.canonicalize(above)
-            emit.apply(below, above)
-            above.set_canon()
+            self.__layer_at(i).canonicalize()
+            # l = self.__layers[i]
+            # above = self.__braids[i + 1]
+            # below = self.__braids[i]
+            # emit = l.canonicalize(above)
+            # emit.apply(below, above)
+            # above.set_canon()
         self.__braids[0].set_canon()
+
+    def attempt_swap(self, index: int) -> bool:
+        """Attempts to move a layer up one index.
+        Mutates the braid on failure and success;
+        always preserves equivalence.
+
+        Args:
+            index (int): Index to move up
+
+        Returns:
+            bool: Whether the layers are swappable
+        """
+        self.__layer_at(index).macro_step()
+        self.__layer_at(index + 1).flip_macro()
+        return self.__swap_if_identity(index)
+
+    def __swap_if_identity(self, index: int) -> bool:
+        middle = self.__braids[index + 1]
+        middle.set_canon()
+        if len(middle) == 0:
+            below = self.__layers[index]
+            above = self.__layers[index + 1]
+            if below.swap(above):
+                self.__layers[index:index+2] = [above, below]
+                self.__braids[index + 1] = Braid(above.n_above())
+                return True
+            else:
+                return False
+        else:
+            return False
 
     def fuzz(self, rng: Callable[[], float], layer_muts: int, braid_muts: int) -> None:
         """Fuzzes the word in place. Executes layer_muts layer mutations
@@ -115,13 +134,37 @@ class Word(Latex):
             braid_muts (int): Number of braid word mutations at
             each layer
         """
-        for i, l in enumerate(self.__layers):
-            emit = l.fuzz(rng, layer_muts)
-            below = self.__braids[i]
-            above = self.__braids[i + 1]
-            emit.apply(below, above)
-            below.fuzz(rng, braid_muts)
-        self.__braids[-1].fuzz(rng, braid_muts)
+        for i in range(len(self.__layers)):
+            self.fuzz_layer(i, rng, layer_muts)
+            self.fuzz_braid(i, rng, braid_muts)
+        self.fuzz_braid(len(self.__layers), rng, braid_muts)
+        # for i, l in enumerate(self.__layers):
+        #     emit = l.fuzz(rng, layer_muts)
+        #     below = self.__braids[i]
+        #     above = self.__braids[i + 1]
+        #     emit.apply(below, above)
+        #     below.fuzz(rng, braid_muts)
+        # self.__braids[-1].fuzz(rng, braid_muts)
+
+    def fuzz_layer(self, index: int, rng: Callable[[], float], layer_muts: int) -> None:
+        """Fuzzes the layer at the given index
+
+        Args:
+            index (int): Index in the layers list
+            rng (Callable[[], float]): [0, 1] random number generator
+            layer_muts (int): Number of mutation attempts to make
+        """
+        self.__layer_at(index).fuzz(rng, layer_muts)
+
+    def fuzz_braid(self, index: int, rng: Callable[[], float], braid_muts: int) -> None:
+        """Fuzzes the braid at the given index
+
+        Args:
+            index (int): Index in the braids list
+            rng (Callable[[], float]): [0, 1] random number generator
+            braid_muts (int): Number of mutation attempts to make
+        """
+        self.__braids[index].fuzz(rng, braid_muts)
 
     def __repr__(self) -> str:
         repr_str = ":".join([repr(obj) for obj in self])

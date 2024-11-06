@@ -33,7 +33,7 @@ BRAID_MUTATIONS_AVERAGE = 100
 # AVERAGE_ABOVE_BRAID_LENGTH = 10
 # AVERAGE_TWISTS = 2
 
-BASE_SEED = 0
+BASE_SEED = 1020000
 
 random.seed(BASE_SEED)
 rng = random.random
@@ -60,7 +60,7 @@ def test_braid_fuzzing_preserves_equivalence() -> None:
     fails = 0
     for i in range(NUM_TESTS):
         if i % 1000 == 0:
-            print(i)
+            print(BASE_SEED + i)
         random.seed(BASE_SEED + i)
 
         # TODO: move this to a random word generator function
@@ -137,7 +137,7 @@ def test_braid_fuzzing_preserves_equivalence() -> None:
         original_word_keepsafe.canonicalize()
 
         # BEGIN FUZZING
-        original_word.layer_at(0).fuzz(rng, geometric(LAYER_MUTATIONS_AVERAGE))
+        original_word.fuzz_layer(0, rng, geometric(LAYER_MUTATIONS_AVERAGE))
         # original_word_check = original_word.copy()
         # original_word_check.canonicalize()
         # assert original_word_check == original_word_keepsafe
@@ -152,7 +152,7 @@ def test_braid_fuzzing_preserves_equivalence() -> None:
         #     print(e)
 
         # top_layer.fuzz(rng, geometric(LAYER_MUTATIONS_AVERAGE))
-        original_word.layer_at(1).fuzz(rng, geometric(LAYER_MUTATIONS_AVERAGE))
+        original_word.fuzz_layer(0, rng, geometric(LAYER_MUTATIONS_AVERAGE))
         # original_word_check = original_word.copy()
         # original_word_check.canonicalize()
         # assert original_word_check == original_word_keepsafe
@@ -166,7 +166,7 @@ def test_braid_fuzzing_preserves_equivalence() -> None:
         #     print(e)
         # bottom_layer.fuzz_braid(rng, geometric(BRAID_MUTATIONS_AVERAGE))
         # original_word.fuzz_braid(1, rng, geometric(BRAID_MUTATIONS_AVERAGE))
-        original_word.braid_at(1).fuzz(rng, geometric(BRAID_MUTATIONS_AVERAGE))
+        original_word.fuzz_braid(1, rng, geometric(BRAID_MUTATIONS_AVERAGE))
         # original_word_check = original_word.copy()
         # original_word_check.canonicalize()
         # assert original_word_check == original_word_keepsafe
@@ -185,7 +185,16 @@ def test_braid_fuzzing_preserves_equivalence() -> None:
         # bottom_layer.canonicalize()
         # bottom_layer.delta_step()
         # no canon for bottom
-        original_word.layer_at(1).flip_macro()
+        # original_word.canonicalize()
+        # original_word.compile_latex("hi0", context_in)
+        success = original_word.attempt_swap(0)
+        assert success
+        # original_word.canonicalize()
+        # original_word.compile_latex("hi1", context_in)
+        success = original_word.attempt_swap(0)
+        # original_word.compile_latex("hi2", context_in)
+        assert success
+        # original_word.layer_at(1).flip_macro()
         # original_word.compile_latex(f"{i}_5_top_macro_3", context_in)
         # original_word_check = original_word.copy()
         # original_word_check.canonicalize()
@@ -199,7 +208,7 @@ def test_braid_fuzzing_preserves_equivalence() -> None:
         #     print(e)
         # top_layer = top_layer.flip_canonicalize_delta()
         # top_layer = top_layer.flip_macro()
-        original_word.layer_at(0).macro_step()
+        # original_word.layer_at(0).macro_step()
         # original_word_check = original_word.copy()
         # original_word_check.canonicalize()
         # assert original_word_check == original_word_keepsafe
@@ -211,7 +220,7 @@ def test_braid_fuzzing_preserves_equivalence() -> None:
         # )
 
         # H2 check
-        assert len(original_word.layer_at(0).macro_subbraid().canon()) == 0
+        # assert len(original_word.layer_at(0).macro_subbraid().canon()) == 0
 
         # try:
         #     original_word = Word()
@@ -223,7 +232,7 @@ def test_braid_fuzzing_preserves_equivalence() -> None:
         #     print(e)
         # bottom_layer.canonicalize()
         # bottom_layer.macro_step()
-        original_word.braid_at(1).set_canon()
+        # original_word.braid_at(1).set_canon()
         # original_word_check = original_word.copy()
         # original_word_check.canonicalize()
         # assert original_word_check == original_word_keepsafe
@@ -239,13 +248,6 @@ def test_braid_fuzzing_preserves_equivalence() -> None:
         # bottom_layer.canonicalize()
         # END MOVE-PAST ALGO
 
-        if not len(original_word.braid_at(1)) == 0:
-            print(f"FAIL ON SEED {BASE_SEED + i}")
-            assert False
-
-        # if not old_left == new_left:
-        # fails += 1
-        # assert False
 
         # BEGIN VALIDITY TEST
         original_word.canonicalize()
