@@ -13,7 +13,7 @@ WORDS_PER_N = 1
 LETTERS_PER_WORD = 10
 MUTANTS_PER_WORD = 5
 MUTATION_ATTEMPTS_PER_WORD = 100
-# Took ~35 seconds with the above settings
+# Took ~48 seconds with the above settings
 
 rng = random.random
 random.seed(42)

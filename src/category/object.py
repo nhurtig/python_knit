@@ -25,6 +25,26 @@ class PrimitiveObject(ABC):
         """
         return self.__id
 
+    def __hash__(self) -> int:
+        return id(self)
+
+    def eqv(self, other: object) -> bool:
+        """Whether this PrimitiveObject is equivalent
+        (same id, twists) to another. This isn't __eq__
+        because that's used for hashing
+
+        Args:
+            other (object): object to compare to
+
+        Returns:
+            bool: whether the object is equivalent
+        """
+        return (
+            isinstance(other, PrimitiveObject)
+            and self.twists() == other.twists()
+            and self.id() == other.id()
+        )
+
     @abstractmethod
     def copy(
         self, copied_object_dict: Dict[PrimitiveObject, PrimitiveObject]
@@ -85,12 +105,6 @@ class Carrier(PrimitiveObject):
     def __str__(self) -> str:
         return "c"
 
-    def __eq__(self, other: object) -> bool:
-        return isinstance(other, Carrier) and self.__id == other.id()
-
-    def __hash__(self) -> int:
-        return self.id() * 2
-
 
 class Loop(PrimitiveObject):
     """Two yarns that are never separated. Keeps
@@ -119,13 +133,3 @@ class Loop(PrimitiveObject):
 
     def __str__(self) -> str:
         return "l"
-
-    def __eq__(self, other: object) -> bool:
-        return (
-            isinstance(other, Loop)
-            and self.id() == other.id()
-            and self.__twists == other.twists()
-        )
-
-    def __hash__(self) -> int:
-        return self.id() * 2 + 1

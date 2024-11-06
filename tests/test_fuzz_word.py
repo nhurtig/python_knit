@@ -42,9 +42,9 @@ def random_word(num_boxes: int, rng: random.Random) -> Word:
         Word: Random layer
     """
     w = Word()
-    prev_b = Braid(0)
+    prev_strands = 0
     for _ in range(num_boxes):
-        knit_ins = min(int(rng.random() * (MAX_INS - MIN_INS)) + MIN_INS, prev_b.n())
+        knit_ins = min(int(rng.random() * (MAX_INS - MIN_INS)) + MIN_INS, prev_strands)
         knit_outs = int(rng.random() * (MAX_OUTS - MIN_OUTS)) + MIN_OUTS
         k = Knit(
             Bed(rng.random() < 0.5),
@@ -52,10 +52,11 @@ def random_word(num_boxes: int, rng: random.Random) -> Word:
             [Loop(0) for _ in range(knit_ins)],
             [Loop(0) for _ in range(knit_outs)],
         )
-        left = int(rng.random() * (prev_b.n() - knit_ins))
-        b = random_braid_word(prev_b.n() + knit_outs - knit_ins, LETTERS_PER_WORD)
-        w.append_layer(Layer(left, k, b, prev_b))
-        prev_b = b
+        left = int(rng.random() * (prev_strands - knit_ins))
+        b = random_braid_word(prev_strands + knit_outs - knit_ins, LETTERS_PER_WORD)
+        w.append_layer(Layer(left, k, prev_strands - left - knit_ins))
+        w.append_braid(b)
+        prev_strands = b.n()
     return w
 
 

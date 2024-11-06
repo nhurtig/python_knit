@@ -33,7 +33,7 @@ BRAID_MUTATIONS_AVERAGE = 100
 # AVERAGE_ABOVE_BRAID_LENGTH = 10
 # AVERAGE_TWISTS = 2
 
-BASE_SEED = 215000
+BASE_SEED = 0
 
 random.seed(BASE_SEED)
 rng = random.random
@@ -59,9 +59,11 @@ def test_braid_fuzzing_preserves_equivalence() -> None:
     """Playground to experiment with move-past algorithms"""
     fails = 0
     for i in range(NUM_TESTS):
-        if i % 100 == 0:
+        if i % 1000 == 0:
             print(i)
         random.seed(BASE_SEED + i)
+
+        # TODO: move this to a random word generator function
         n = 0
         bottom_outs = 1
         top_ins = 1
@@ -115,21 +117,10 @@ def test_braid_fuzzing_preserves_equivalence() -> None:
         #     for _ in range(geometric(AVERAGE_TWISTS)):
         #         loop.twist(pos)
 
-        below_braid = Braid(n - bottom_outs + bottom_ins)  # no ins for bottom
-        # above_braid = random_braid_word(n - top_ins + top_outs, geometric(AVERAGE_ABOVE_BRAID_LENGTH))
-        above_braid = Braid(n - top_ins + top_outs)
-        middle_braid = Braid(n)
+        bottom_layer = Layer(bottom_index, bottom_box, n - bottom_index - bottom_outs)
+        top_layer = Layer(top_index, top_box, n - top_index - top_ins)
 
-        # JUST FOR DRAWING
-        bottomest_box = Knit(Bed(True), Dir(True), [], context_in)
-        bottomest_layer = Layer(0, bottomest_box, below_braid, Braid(0))
-
-        bottom_layer = Layer(bottom_index, bottom_box, middle_braid, below_braid)
-
-        top_layer = Layer(top_index, top_box, above_braid, middle_braid)
-
-        original_word = Word()
-        original_word.append_layer(bottomest_layer)
+        original_word = Word(len(context_in))
         original_word.append_layer(bottom_layer)
         original_word.append_layer(top_layer)
 
@@ -138,7 +129,7 @@ def test_braid_fuzzing_preserves_equivalence() -> None:
         # original_word.append_layer(bottomest_layer)
         # original_word.append_layer(bottom_layer)
         # original_word.append_layer(top_layer)
-        # original_word.compile_latex(f"{i}_1_orig")
+        # original_word.compile_latex(f"{i}_1_orig", context_in)
         # except subprocess.CalledProcessError as e:
         # print(e)
 
@@ -146,32 +137,45 @@ def test_braid_fuzzing_preserves_equivalence() -> None:
         original_word_keepsafe.canonicalize()
 
         # BEGIN FUZZING
-        bottom_layer.fuzz_layer(rng, geometric(LAYER_MUTATIONS_AVERAGE))
+        original_word.layer_at(0).fuzz(rng, geometric(LAYER_MUTATIONS_AVERAGE))
+        original_word_check = original_word.copy()
+        original_word_check.canonicalize()
+        assert original_word_check == original_word_keepsafe
+        # bottom_layer.fuzz(rng, geometric(LAYER_MUTATIONS_AVERAGE))
         # try:
         #     original_word = Word()
         #     original_word.append_layer(bottomest_layer)
         #     original_word.append_layer(bottom_layer)
         #     original_word.append_layer(top_layer)
-        #     original_word.compile_latex(f"{i}_2_bot")
+        # original_word.compile_latex(f"{i}_2_bot", context_in)
         # except subprocess.CalledProcessError as e:
         #     print(e)
 
-        top_layer.fuzz_layer(rng, geometric(LAYER_MUTATIONS_AVERAGE))
+        # top_layer.fuzz(rng, geometric(LAYER_MUTATIONS_AVERAGE))
+        original_word.layer_at(1).fuzz(rng, geometric(LAYER_MUTATIONS_AVERAGE))
+        original_word_check = original_word.copy()
+        original_word_check.canonicalize()
+        assert original_word_check == original_word_keepsafe
         # try:
         #     original_word = Word()
         #     original_word.append_layer(bottomest_layer)
         #     original_word.append_layer(bottom_layer)
         #     original_word.append_layer(top_layer)
-        #     original_word.compile_latex(f"{i}_3_top")
+        # original_word.compile_latex(f"{i}_3_top_2", context_in)
         # except subprocess.CalledProcessError as e:
         #     print(e)
-        bottom_layer.fuzz_braid(rng, geometric(BRAID_MUTATIONS_AVERAGE))
+        # bottom_layer.fuzz_braid(rng, geometric(BRAID_MUTATIONS_AVERAGE))
+        # original_word.fuzz_braid(1, rng, geometric(BRAID_MUTATIONS_AVERAGE))
+        original_word.braid_at(1).fuzz(rng, geometric(BRAID_MUTATIONS_AVERAGE))
+        original_word_check = original_word.copy()
+        original_word_check.canonicalize()
+        assert original_word_check == original_word_keepsafe
         # try:
         #     original_word = Word()
         #     original_word.append_layer(bottomest_layer)
         #     original_word.append_layer(bottom_layer)
         #     original_word.append_layer(top_layer)
-        #     original_word.compile_latex(f"{i}_4_mid")
+        # original_word.compile_latex(f"{i}_4_mid", context_in)
         # except subprocess.CalledProcessError as e:
         #     print(e)
         # END FUZZING
@@ -181,51 +185,61 @@ def test_braid_fuzzing_preserves_equivalence() -> None:
         # bottom_layer.canonicalize()
         # bottom_layer.delta_step()
         # no canon for bottom
-        bottom_layer.macro_step()
+        original_word.layer_at(1).flip_macro()
+        # original_word.compile_latex(f"{i}_5_top_macro_3", context_in)
+        original_word_check = original_word.copy()
+        original_word_check.canonicalize()
+        assert original_word_check == original_word_keepsafe
         # try:
         #     original_word = Word()
         #     original_word.append_layer(bottomest_layer)
         #     original_word.append_layer(bottom_layer)
         #     original_word.append_layer(top_layer)
-        #     original_word.compile_latex(f"{i}_5_top_macro")
         # except subprocess.CalledProcessError as e:
         #     print(e)
         # top_layer = top_layer.flip_canonicalize_delta()
-        top_layer = top_layer.flip_macro()
-        bottom_layer = Layer(
-            bottom_layer.left(),
-            bottom_layer.middle(),
-            top_layer.below(),
-            bottom_layer.below(),
-        )
+        # top_layer = top_layer.flip_macro()
+        original_word.layer_at(0).macro_step()
+        original_word_check = original_word.copy()
+        original_word_check.canonicalize()
+        assert original_word_check == original_word_keepsafe
+        # bottom_layer = Layer(
+        #     bottom_layer.left(),
+        #     bottom_layer.middle(),
+        #     top_layer.below(),
+        #     bottom_layer.below(),
+        # )
 
         # H2 check
-        assert len(bottom_layer.macro_subbraid().canon()) == 0
+        assert len(original_word.layer_at(0).macro_subbraid().canon()) == 0
 
         # try:
         #     original_word = Word()
         #     original_word.append_layer(bottomest_layer)
         #     original_word.append_layer(bottom_layer)
         #     original_word.append_layer(top_layer)
-        #     original_word.compile_latex(f"{i}_6_bot_macro")
+        # original_word.compile_latex(f"{i}_6_bot_macro", context_in)
         # except subprocess.CalledProcessError as e:
         #     print(e)
         # bottom_layer.canonicalize()
         # bottom_layer.macro_step()
-        bottom_layer.layer_canon()
-        try:
-            original_word = Word()
-            original_word.append_layer(bottomest_layer)
-            original_word.append_layer(bottom_layer)
-            original_word.append_layer(top_layer)
-            # original_word.compile_latex(f"{i}_7_layer_canon")
-        except subprocess.CalledProcessError as e:
-            print(e)
+        original_word.braid_at(1).set_canon()
+        original_word_check = original_word.copy()
+        original_word_check.canonicalize()
+        assert original_word_check == original_word_keepsafe
+        # try:
+        #     original_word = Word()
+        #     original_word.append_layer(bottomest_layer)
+        #     original_word.append_layer(bottom_layer)
+        #     original_word.append_layer(top_layer)
+        # original_word.compile_latex(f"{i}_7_layer_canon", context_in)
+        # except subprocess.CalledProcessError as e:
+        #     print(e)
         # top_layer.canonicalize()
         # bottom_layer.canonicalize()
         # END MOVE-PAST ALGO
 
-        if not len(bottom_layer.above()) == 0:
+        if not len(original_word.braid_at(1)) == 0:
             print(f"FAIL ON SEED {BASE_SEED + i}")
             assert False
 
@@ -234,16 +248,10 @@ def test_braid_fuzzing_preserves_equivalence() -> None:
         # assert False
 
         # BEGIN VALIDITY TEST
-        # new_word = Word()
-        # new_bottomest_layer = Layer(0, bottomest_box, bottom_layer.below(), Braid(0))
-        # new_word.append_layer(bottomest_layer)
-        # new_word.append_layer(bottom_layer)
-        # new_word.append_layer(top_layer)
-        # new_word.canonicalize()
-        # original_word.canonicalize()
+        original_word.canonicalize()
         # original_word_keepsafe.canonicalize()
 
-        # assert original_word == original_word_keepsafe
+        assert original_word == original_word_keepsafe
         # END VALIDITY TEST
 
     succeeded = NUM_TESTS - fails

@@ -74,8 +74,8 @@ class LayerEmit:
             LayerEmit: vertically flipped LayerEmit
         """
         flipped = LayerEmit(self.above().n(), self.below().n())
-        for g in self.__above: # reads inside to out
-            flipped.emit_above(g)
-        for g in reversed(list(self.__below)): # inside to out
+        for g in reversed(list(self.__above)):  # reads outside to in
             flipped.emit_below(g)
+        for g in self.__below:  # outside to in
+            flipped.emit_above(g)
         return flipped

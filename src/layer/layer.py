@@ -23,7 +23,7 @@ class Layer(Latex):
     def __init__(self, left: int, middle: Knit, right: int) -> None:
         self.__left = left
         self.__middle = middle
-        self.__right = right
+        self.__id_count = left + right
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Layer):
@@ -53,7 +53,7 @@ class Layer(Latex):
         return l
 
     def __repr__(self) -> str:
-        return f"Layer({self.__left}:{repr(self.__middle)}):{self.__right}"
+        return f"Layer({self.__left}:{repr(self.__middle)}:{self.right()})"
 
     def n_above(self) -> int:
         """Calculates how many strands are above
@@ -62,7 +62,7 @@ class Layer(Latex):
         Returns:
             int: Number of strands above this layer
         """
-        return self.__left + len(self.__middle.outs()) + self.__right
+        return self.__id_count + len(self.__middle.outs())
 
     def n_below(self) -> int:
         """Calculates how many strands are below
@@ -71,7 +71,7 @@ class Layer(Latex):
         Returns:
             int: Number of strands below this layer
         """
-        return self.__left + len(self.__middle.ins()) + self.__right
+        return self.__id_count + len(self.__middle.ins())
 
     def left(self) -> int:
         """Getter
@@ -87,7 +87,7 @@ class Layer(Latex):
         Returns:
             int: Count of identity strands right of the box
         """
-        return self.__right
+        return self.__id_count - self.__left
 
     def middle(self) -> Knit:
         """Getter
@@ -249,15 +249,12 @@ class Layer(Latex):
 
         return emit
 
-    def flip_vertical(self) -> Layer:
-        """Returns a Layer that represents this
-        layer flipped upside down (not rotated,
-        instead reflected)
-
-        Returns:
-            Layer: flipped layer
+    def flip_vertical(self) -> None:
+        """Flips this layer upside down
+        (not rotated, instead reflected)
         """
-        return Layer(self.left(), self.middle().flip_vertical(), self.right())
+        self.__middle = self.middle().flip_vertical()
+        # return Layer(self.left(), self.middle().flip_vertical(), self.right())
 
     def flip_macro(self, below: Braid) -> LayerEmit:
         """Does the macro substep of canonicalization
@@ -270,8 +267,10 @@ class Layer(Latex):
             LayerEmit: layer that's equivalent to this
             layer in a looking-down canonical form
         """
-        upside_down = self.flip_vertical()
-        emit = upside_down.macro_step(below.flip_vertical())
+        self.flip_vertical()
+        emit = self.macro_step(below.flip_vertical())
+        self.flip_vertical()
+        # self.__left = upside_down.left()
         return emit.flip_vertical()
 
     def canonicalize(self, above: Braid) -> LayerEmit:
@@ -322,7 +321,7 @@ class Layer(Latex):
                 emit.extend(self.sigma_conj(gen.i(), Sign(not gen.pos())))
         return emit
 
-    def fuzz_layer(self, rng: Callable[[], float], steps: int) -> LayerEmit:
+    def fuzz(self, rng: Callable[[], float], steps: int) -> LayerEmit:
         """Fuzzes this layer by performing layer operations; doesn't
         fuzz either braid
 

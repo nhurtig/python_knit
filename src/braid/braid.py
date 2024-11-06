@@ -80,6 +80,10 @@ class Braid(Latex):
         out = canonicalize_braid(self.n(), [g.to_sage() for g in self.__gens])
         return Braid.from_sage(out, self.n())
 
+    def set_canon(self) -> None:
+        """Makes this braid the canon version of itself"""
+        self.__gens = list(self.canon())
+
     @staticmethod
     def from_sage(sage_out: List[Tuple[str, int]], n: int) -> Braid:
         """Makes a braid from sagemath's output. See sage.py for how

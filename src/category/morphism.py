@@ -30,12 +30,13 @@ class Knit(Latex):
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Knit):
             return False
-        # TODO: ins, outs shouldn't be used for this. Should consider slurpables too
         return (
             self.bed() == other.bed()
             and self.dir() == other.dir()
-            and self.ins() == other.ins()
-            and self.outs() == other.outs()
+            and all(i1.eqv(i2) for (i1, i2) in zip(self.ins(), other.ins()))
+            and all(o1.eqv(o2) for (o1, o2) in zip(self.outs(), other.outs()))
+            and self.dropped_ins() == other.dropped_ins()
+            and self.dropped_outs() == other.dropped_outs()
         )
 
     def flip_vertical(self) -> Knit:
@@ -74,7 +75,10 @@ class Knit(Latex):
             self.__bed,
             self.__dir,
             [o.copy(copied_object_dict) if o is not None else None for o in self.__ins],
-            [o.copy(copied_object_dict) if o is not None else None for o in self.__outs],
+            [
+                o.copy(copied_object_dict) if o is not None else None
+                for o in self.__outs
+            ],
         )
 
     def to_latex(self, x: int, y: int, context: Sequence[PrimitiveObject]) -> str:
@@ -123,6 +127,24 @@ class Knit(Latex):
             list[PrimitiveObject]: Input objects
         """
         return list(filter(Knit.__is_not_none, self.__ins))
+
+    def dropped_ins(self) -> list[bool]:
+        """Returns a list of the in strands,
+        with True for dropped (slurped) strands
+
+        Returns:
+            list[bool]: Indices where strands are dropped
+        """
+        return [i is None for i in self.__ins]
+
+    def dropped_outs(self) -> list[bool]:
+        """Returns a list of the out strands,
+        with True for dropped (slurped) strands
+
+        Returns:
+            list[bool]: Indices where strands are dropped
+        """
+        return [o is None for o in self.__outs]
 
     def primary(self) -> Loop:
         """Returns the primary Loop object
@@ -177,7 +199,7 @@ class Knit(Latex):
         return i
 
     def __repr__(self) -> str:
-        return f"Knit(front={repr(self.__bed.front())}, right={repr(self.__dir.right())}, ins={len(self.__ins)}, outs={len(self.__outs)})"
+        return f"Knit(front={repr(self.__bed.front())}, right={repr(self.__dir.right())}, ins={len(self.ins())}, outs={len(self.outs())})"
 
     def __str__(self) -> str:
         return f"""[{", ".join(["slurped" if o is None else str(o) for o in self.__outs])}]

@@ -10,18 +10,20 @@ from braid.braid import Braid, StrandMismatchException
 from category.object import PrimitiveObject
 from fig_gen.latex import Latex
 from layer.layer import Layer
+from layer.layer_wrapper import LayerWrapper
+
 
 class Word(Latex):
     """Words are a list of Layers and the
     Braids between them"""
 
-    def __init__(self, bottom_braid: Braid = Braid(0)) -> None:
+    def __init__(self, bottom_strands: int = 0) -> None:
         # TODO: the connections of PrimitiveObjects between layers
         # is a graph structure. Leverage that?
         self.__layers: list[Layer] = []
-        self.__braids: list[Braid] = [bottom_braid]
+        self.__braids: list[Braid] = [Braid(bottom_strands)]
         self.__iter_index = 0
-        self.__braid_next = True
+        self.__iter_braid_next = True
         # braids[i] is below layers[i];
         # braids[i+1] is above.
         # len(braids) = len(layers) + 1 always
@@ -34,13 +36,40 @@ class Word(Latex):
             Word: Not-shallow
             copy
         """
-        w = Word(self.__braids[0]) # guaranteed at least one braid
+        w = Word(self.__braids[0].n())  # guaranteed at least one braid
         copied_object_dict: dict[PrimitiveObject, PrimitiveObject] = {}
-        for (i, l) in enumerate(self.__layers):
+        for i, l in enumerate(self.__layers):
+            below_braid = self.__braids[i]
+            w.append_braid(below_braid.copy())
             w.append_layer(l.copy(copied_object_dict))
-            above_braid = self.__braids[i+1]
-            w.append_braid(above_braid.copy())
+        w.append_braid(self.__braids[-1])
         return w
+
+    def layer_at(self, index: int) -> LayerWrapper:
+        """Returns a wrapper around the layer at this
+        index. The wrapper applies any emitted effects
+        to the neighboring braids
+
+        Args:
+            index (int): index in the layer list
+
+        Returns:
+            LayerWrapper: Wrapper around the indexed layer
+        """
+        return LayerWrapper(
+            self.__braids[index], self.__layers[index], self.__braids[index + 1]
+        )
+
+    def braid_at(self, index: int) -> Braid:
+        """Getter that wraps the braid list
+
+        Args:
+            index (int): Index in the braid list
+
+        Returns:
+            Braid: Braid at that index
+        """
+        return self.__braids[index]
 
     def append_layer(self, l: Layer) -> None:
         """Adds a layer on top of this word
@@ -67,10 +96,12 @@ class Word(Latex):
         """Canonicalizes the word in place"""
         for i in range(len(self.__layers) - 1, -1, -1):
             l = self.__layers[i]
-            above = self.__braids[i+1]
+            above = self.__braids[i + 1]
             below = self.__braids[i]
             emit = l.canonicalize(above)
             emit.apply(below, above)
+            above.set_canon()
+        self.__braids[0].set_canon()
 
     def fuzz(self, rng: Callable[[], float], layer_muts: int, braid_muts: int) -> None:
         """Fuzzes the word in place. Executes layer_muts layer mutations
@@ -84,12 +115,13 @@ class Word(Latex):
             braid_muts (int): Number of braid word mutations at
             each layer
         """
-        for (i, l) in enumerate(self.__layers):
-            emit = l.fuzz_layer(rng, layer_muts)
+        for i, l in enumerate(self.__layers):
+            emit = l.fuzz(rng, layer_muts)
             below = self.__braids[i]
-            above = self.__braids[i+1]
+            above = self.__braids[i + 1]
             emit.apply(below, above)
             below.fuzz(rng, braid_muts)
+        self.__braids[-1].fuzz(rng, braid_muts)
 
     def __repr__(self) -> str:
         repr_str = ":".join([repr(obj) for obj in self])
@@ -98,23 +130,23 @@ class Word(Latex):
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Word):
             return False
-        return iter(self) == iter(other)
+        return list(self) == list(other)
 
     def __iter__(self) -> Word:
         self.__iter_index = 0
-        self.__braid_next = True
+        self.__iter_braid_next = True
         return self
 
     def __next__(self) -> Union[Braid, Layer]:
-        if self.__braid_next:
+        if self.__iter_braid_next:
             b = self.__braids[self.__iter_index]
-            self.__braid_next = False
+            self.__iter_braid_next = False
             return b
         else:
             if self.__iter_index >= len(self.__layers):
                 raise StopIteration
             l = self.__layers[self.__iter_index]
-            self.__braid_next = True
+            self.__iter_braid_next = True
             self.__iter_index += 1
             return l
 
