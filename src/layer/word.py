@@ -45,7 +45,7 @@ class Word(Latex):
         w.append_braid(self.__braids[-1])
         return w
 
-    def __layer_at(self, index: int) -> LayerWrapper:
+    def layer_at(self, index: int) -> LayerWrapper:
         """Returns a wrapper around the layer at this
         index. The wrapper applies any emitted effects
         to the neighboring braids
@@ -84,7 +84,7 @@ class Word(Latex):
     def canonicalize(self) -> None:
         """Canonicalizes the word in place"""
         for i in range(len(self.__layers) - 1, -1, -1):
-            self.__layer_at(i).canonicalize()
+            self.layer_at(i).canonicalize()
             # l = self.__layers[i]
             # above = self.__braids[i + 1]
             # below = self.__braids[i]
@@ -104,8 +104,8 @@ class Word(Latex):
         Returns:
             bool: Whether the layers are swappable
         """
-        self.__layer_at(index).macro_step()
-        self.__layer_at(index + 1).flip_macro()
+        self.layer_at(index).macro_step()
+        self.layer_at(index + 1).flip_macro()
         return self.__swap_if_identity(index)
 
     def __swap_if_identity(self, index: int) -> bool:
@@ -155,7 +155,7 @@ class Word(Latex):
             rng (Callable[[], float]): [0, 1] random number generator
             layer_muts (int): Number of mutation attempts to make
         """
-        self.__layer_at(index).fuzz(rng, layer_muts)
+        self.layer_at(index).fuzz(rng, layer_muts)
 
     def fuzz_braid(self, index: int, rng: Callable[[], float], braid_muts: int) -> None:
         """Fuzzes the braid at the given index

@@ -68,18 +68,14 @@ def sigma_underline() -> None:
     """Draws an example of the sigma underline rule"""
     reset_colors()
     context: Sequence[PrimitiveObject] = [Carrier(0) for _ in range(3)]
-    w = Word()
-    b = Braid(3)
-    k = Knit(Bed(True), Dir(True), [], [])
-    l = Layer(0, k, b, Braid(3))
-    w.append_layer(l)
+    w = Word(3)
     k = Knit(Bed(True), Dir(True), list(context[:2]), [Carrier(0) for _ in range(2)])
-    l = Layer(0, k, Braid(3), b)
+    l = Layer(0, k, 1)
     w.append_layer(l)
 
     w.compile_latex("sigma_underline_before", context)
 
-    l.underline_conj(Dir(True), True)
+    w.layer_at(0).underline_conj(Dir(True), True)
 
     w.compile_latex("sigma_underline_after", context)
 
@@ -88,17 +84,14 @@ def sigma_conj() -> None:
     """Draws an example of the sigma conjugation rule"""
     reset_colors()
     context = [Carrier(0) for _ in range(3)]
-    w = Word()
-    b = Braid(3)
-    l = Layer(0, Knit(Bed(True), Dir(True), [], []), b, Braid(3))
-    w.append_layer(l)
+    w = Word(3)
     k = Knit(Bed(True), Dir(True), [context[0]], [Carrier(0)])
-    l = Layer(0, k, Braid(3), b)
+    l = Layer(0, k, 2)
     w.append_layer(l)
 
     w.compile_latex("sigma_conj_before", context)
 
-    l.sigma_conj(1, Sign(True))
+    w.layer_at(0).sigma_conj(1, Sign(True))
 
     w.compile_latex("sigma_conj_after", context)
 
@@ -107,17 +100,12 @@ def delta_conj() -> None:
     """Draws an example of the delta conjugation rule"""
     reset_colors()
     context: Sequence[PrimitiveObject] = [Carrier(0) for _ in range(3)]
-    w = Word()
-    b = Braid(3)
-    w.append_layer(Layer(0, Knit(Bed(True), Dir(True), [], []), b, Braid(3)))
+    w = Word(3)
     l = Layer(
-        0,
-        Knit(Bed(True), Dir(True), list(context), [Carrier(0) for _ in range(3)]),
-        Braid(3),
-        b,
+        0, Knit(Bed(True), Dir(True), list(context), [Carrier(0) for _ in range(3)]), 0
     )
     w.append_layer(l)
 
     w.compile_latex("delta_conj_before", context)
-    l.delta(Sign(True))
+    w.layer_at(0).delta(Sign(True))
     w.compile_latex("delta_conj_after", context)

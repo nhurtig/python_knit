@@ -3,6 +3,7 @@
 from __future__ import annotations
 from typing import Callable
 from braid.braid import Braid
+from common.common import Dir, Sign
 from layer.layer import Layer
 from layer.layer_emit import LayerEmit
 
@@ -35,11 +36,23 @@ class LayerWrapper:
         """
         self.__apply(self.__layer.macro_step(self.__above))
 
+    def sigma_conj(self, i: int, sign: Sign) -> None:
+        """See Layer's sigma_conj"""
+        self.__apply(self.__layer.sigma_conj(i, sign))
+
+    def underline_conj(self, d: Dir, above: bool) -> None:
+        """See Layer's underline_conj"""
+        self.__apply(self.__layer.underline_conj(d, above))
+
     def delta_step(self) -> None:
         """Performs the delta step of the algorithm
         on this layer, mutating it in place
         """
         self.__apply(self.__layer.delta_step())
+
+    def delta(self, sign: Sign) -> None:
+        """See Layer's delta"""
+        self.__apply(self.__layer.delta(sign))
 
     def canonicalize(self) -> None:
         """Canonicalizes this layer, mutating
