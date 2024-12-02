@@ -43,7 +43,11 @@ class TnGen():
 
 def pi_b_type(t: TnType, bottom_outs: int) -> TnType:
     new_perm = [x - bottom_outs + 1 if x >= bottom_outs else -1 if x != 0 else 0 for x in t.perm]
-    return TnType(new_perm)
+    new_new_perm = []
+    for x in new_perm:
+        if x >= 0:
+            new_new_perm.append(x)
+    return TnType(new_new_perm)
 
 def pi_b(g: TnGen) -> Optional[TnGen]:
     s1 = g.input.perm[g.index]
@@ -127,5 +131,103 @@ def psi_b(g: TnGen) -> list[TnGen]:
     pi_g = pi_b(g)
     if pi_g is not None:
         return phi_b(pi_g, g.info)
+    else:
+        return []
+
+# TOP
+
+def pi_t_type(t: TnType, bottom_outs: int, top_ins: int) -> TnType:
+    new_perm = [x if x < bottom_outs else x - top_ins + 1 if x >= bottom_outs + top_ins else -1 if x != bottom_outs else bottom_outs for x in t.perm]
+    new_new_perm = []
+    for x in new_perm:
+        if x >= 0:
+            new_new_perm.append(x)
+    return TnType(new_new_perm)
+
+def pi_t(g: TnGen) -> Optional[TnGen]:
+    s1 = g.input.perm[g.index]
+    s2 = g.input.perm[g.index + 1]
+    proj_input = pi_t_type(g.input, g.info.bottom_outs, g.info.top_ins)
+    if s1 >= g.info.bottom_outs and s1 < g.info.bottom_outs + g.info.top_ins and s1 == g.info.bottom_outs:
+        # s1 primary
+        if s2 >= g.info.bottom_outs and s2 < g.info.bottom_outs + g.info.top_ins and s2 == g.info.bottom_outs:
+            # s1 primary, s2 primary???
+            raise ValueError("permutation not valid!")
+        else:
+            if s2 >= g.info.bottom_outs and s2 < g.info.bottom_outs + g.info.top_ins:
+                # s2 ignored
+                return None
+            else:
+                # s1 primary, s2 non-primary
+                new_s1 = g.info.bottom_outs
+                return TnGen(TnInfo(proj_input.n, 1, 1), proj_input, proj_input.perm.index(new_s1), g.pos)
+    else:
+        if s1 >= g.info.bottom_outs and s1 < g.info.bottom_outs + g.info.top_ins:
+            # s1 ignored
+            return None
+        else:
+            # s1 non-primary
+            if s2 >= g.info.bottom_outs and s2 < g.info.bottom_outs + g.info.top_ins and s2 == g.info.bottom_outs:
+                # s1 non-primary, s2 primary
+                new_s1 = s1 if s1 < g.info.bottom_outs else s1 - g.info.top_ins + 1
+                return TnGen(TnInfo(proj_input.n, 1, 1), proj_input, proj_input.perm.index(new_s1), g.pos)
+            else:
+                if s2 >= g.info.bottom_outs and s2 < g.info.bottom_outs + g.info.top_ins:
+                    # s2 ignored
+                    return None
+                else:
+                    # s1 non-primary, s2 non-primary
+                    new_s1 = s1 if s1 < g.info.bottom_outs else s1 - g.info.top_ins + 1
+                    return TnGen(TnInfo(proj_input.n, 1, 1), proj_input, proj_input.perm.index(new_s1), g.pos)
+
+def phi_t_type(t: TnType, bottom_outs: int, top_ins: int) -> TnType:
+    new_perm: list[int] = []
+    for x in t.perm:
+        if x < bottom_outs:
+            new_perm.append(x)
+        elif x == bottom_outs:
+            new_perm.extend(range(bottom_outs, bottom_outs + top_ins))
+        else:
+            new_perm.append(x + top_ins - 1)
+    return TnType(new_perm)
+
+def phi_t(g: TnGen, info: TnInfo) -> list[TnGen]:
+    bottom_outs = info.bottom_outs
+    top_ins = info.top_ins
+    new_input = phi_t_type(g.input, bottom_outs, top_ins)
+    s1 = g.input.perm[g.index]
+    s2 = g.input.perm[g.index + 1]
+    if s1 == bottom_outs:
+        # s1 primary
+        if s2 == bottom_outs:
+            # both primary?
+            raise ValueError
+        else:
+            # s1 primary, s2 non-primary
+            gens = []
+            for iswap in reversed(range(new_input.perm.index(bottom_outs), new_input.perm.index(bottom_outs) + top_ins)):
+                new_g = TnGen(info, new_input, iswap, g.pos)
+                gens.append(new_g)
+                new_input = new_g.output
+            return gens
+    else:
+        # s1 non-primary
+        if s2 == bottom_outs:
+            # s1 non-primary, s2 primary
+            gens = []
+            for iswap in range(new_input.perm.index(bottom_outs) - 1, new_input.perm.index(bottom_outs) + top_ins - 1):
+                new_g = TnGen(info, new_input, iswap, g.pos)
+                gens.append(new_g)
+                new_input = new_g.output
+            return gens
+        else:
+            # both non-primary
+            s1_new = s1 if s1 < bottom_outs else s1 + top_ins - 1
+            return [TnGen(info, new_input, new_input.perm.index(s1_new), g.pos)]
+
+def psi_t(g: TnGen) -> list[TnGen]:
+    pi_g = pi_t(g)
+    if pi_g is not None:
+        return phi_t(pi_g, g.info)
     else:
         return []
