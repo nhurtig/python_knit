@@ -59,7 +59,7 @@ def random_swappable_word() -> Word:
             bottom_index < top_index + top_ins
             and top_index < bottom_index + bottom_outs  # overlap
         )
-        or n - bottom_outs + bottom_ins <= 2  # bottomest box needs 2 outputs
+        or n - bottom_outs + bottom_ins < 2  # bottomest box needs 2 outputs
     ):
         n = geometric(N_AVERAGE - 4) + 4  # at least 4 strands
         bottom_ins = geometric(AVERAGE_OUTIN)
@@ -130,7 +130,7 @@ def test_fuzz_move_past() -> None:
 
             # BEGIN FUZZING
             original_word.fuzz_layer(1, rng, geometric(LAYER_MUTATIONS_AVERAGE))
-            original_word.fuzz_layer(1, rng, geometric(LAYER_MUTATIONS_AVERAGE))
+            original_word.fuzz_layer(2, rng, geometric(LAYER_MUTATIONS_AVERAGE))
             original_word.fuzz_braid(2, rng, geometric(BRAID_MUTATIONS_AVERAGE))
             # END FUZZING
 
