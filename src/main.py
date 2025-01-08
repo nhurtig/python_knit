@@ -13,22 +13,24 @@ from fig_gen.basic_rewrites import (
 )
 from fig_gen.canon_example import word_sigma, word_delta
 from fig_gen.full_example import display_word_steps
+from fig_gen.move_past import draw_move_past
 from fig_gen.poster_example import draw_poster_word
 
 
 def main() -> None:
     """Executes many PDF-PNG drawing commands
     used in the presentation"""
-    sigma_cancel()
-    morph_swap()
-    sigma_underline()
-    sigma_conj()
-    delta_conj()
-    yang_baxter()
-    word_sigma()
-    word_delta()
-    display_word_steps()
-    draw_poster_word()
+    # sigma_cancel()
+    # morph_swap()
+    # sigma_underline()
+    # sigma_conj()
+    # delta_conj()
+    # yang_baxter()
+    # word_sigma()
+    # word_delta()
+    # display_word_steps()
+    # draw_poster_word()
+    draw_move_past()
 
 
 if __name__ == "__main__":

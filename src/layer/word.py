@@ -28,6 +28,13 @@ class Word(Latex):
         # braids[i+1] is above.
         # len(braids) = len(layers) + 1 always
 
+        # Whether zero-length braids at the top and
+        # bottom are drawn or not
+        self.__draw_preamble = True
+        self.__draw_postamble = True
+        self.labels_in: Sequence[str] = []
+        self.labels_out: Sequence[str] = []
+
     def copy(self) -> Word:
         """Copies the word and
         its layers.
@@ -167,6 +174,24 @@ class Word(Latex):
         """
         self.__braids[index].fuzz(rng, braid_muts)
 
+    def draw_preamble(self, draw: bool) -> None:
+        """Setter
+
+        Args:
+            draw (bool): Whether to draw empty braid
+            at start
+        """
+        self.__draw_preamble = draw
+
+    def draw_postamble(self, draw: bool) -> None:
+        """Setter
+
+        Args:
+            draw (bool): Whether to draw empty
+            braid at end
+        """
+        self.__draw_postamble = draw
+
     def __repr__(self) -> str:
         repr_str = ":".join([repr(obj) for obj in self])
         return f"Word({repr_str})"
@@ -194,12 +219,24 @@ class Word(Latex):
             self.__iter_index += 1
             return l
 
+    def __len__(self) -> int:
+        return len(self.__braids) * 2 - 1
+
     def to_latex(self, x: int, y: int, context: Sequence[PrimitiveObject]) -> str:
         latex_str = ""
-        for o in self:
+        for i, s in enumerate(self.labels_in):
+            latex_str += f"\\knitLabel{{{x+i}}}{{{y-1}}}{{${s}$}}\n"
+        for i, o in enumerate(self):
+            if isinstance(o, Braid) and len(o) == 0:
+                if i == 0 and not self.__draw_preamble:
+                    continue
+                if i == len(self) - 1 and not self.__draw_postamble:
+                    continue
             latex_str += o.to_latex(x, y, context)
             y += o.latex_height()
             context = o.context_out(context)
+        for i, s in enumerate(self.labels_out):
+            latex_str += f"\\knitLabel{{{x+i}}}{{{y}}}{{${s}$}}\n"
         return latex_str
 
     def latex_height(self) -> int:

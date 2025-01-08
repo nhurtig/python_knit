@@ -5,16 +5,20 @@ twists"""
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Dict
-from fig_gen.color import color_gen
+from fig_gen.color import ColorGenerator, color_gen
 
 
 class PrimitiveObject(ABC):
     """Abstract class for either a Carrier
     or a Loop"""
 
-    def __init__(self, identity: int) -> None:
+    def __init__(self, identity: int, color: tuple[float, float, float] = (-1, -1, -1)) -> None:
         self.__id = identity
-        self.__color = color_gen.get_next_color()
+        self.__color = color_gen.get_next_color() if sum(color) < 0 else color
+
+    def ghost(self) -> None:
+        """Sets own color to a ghosted hue"""
+        self.__color = ColorGenerator.ghost(self.__color)
 
     def id(self) -> int:
         """Getter
@@ -110,8 +114,8 @@ class Loop(PrimitiveObject):
     """Two yarns that are never separated. Keeps
     track of twists."""
 
-    def __init__(self, identity: int) -> None:
-        super().__init__(identity)
+    def __init__(self, identity: int, color: tuple[float, float, float] = (-1, -1, -1)) -> None:
+        super().__init__(identity, color)
         self.__twists: int = 0
 
     def copy(

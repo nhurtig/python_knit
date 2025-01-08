@@ -108,4 +108,4 @@ def delta_conj() -> None:
 
     w.compile_latex("delta_conj_before", context)
     w.layer_at(0).delta(Sign(True))
-    w.compile_latex("delta_conj_after", context)
+    w.compile_latex("delta_conj_after", context, True)

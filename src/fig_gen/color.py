@@ -5,6 +5,8 @@ from __future__ import annotations
 import colorsys
 
 COLOR_OFFSET: float = 0
+GHOST_LIGHTNESS: float = 0.35
+REGULAR_LIGHTNESS: float = 0.95
 
 
 # van der corput sequence
@@ -27,8 +29,11 @@ class ColorGenerator:
 
         # Convert HSL to RGB
         r, g, b = colorsys.hls_to_rgb(
-            hue, 0.95 if self.__index in self.__ghosting else 0.35, 1.0
+            hue, REGULAR_LIGHTNESS, 1.0
         )  # Lightness is 0.5 for good visibility, Saturation is 0.9
+
+        if self.__index in self.__ghosting:
+            r, g, b = ColorGenerator.ghost((r, g, b))
         self.__index += 1
         return (r, g, b)
 
@@ -41,6 +46,18 @@ class ColorGenerator:
             i //= base
             fraction /= base
         return result
+
+    @staticmethod
+    def ghost(color: tuple[float, float, float]) -> tuple[float, float, float]:
+        """Lightens the input RGB triple, making it closer to white
+
+        Args:
+            color (tuple[float, float, float]): RGB triple
+
+        Returns:
+            tuple[float, float, float]: Ghosted RGB triple
+        """
+        return tuple([c + (1 - c) * 0.9 for c in color])
 
     def reset(self) -> None:
         """Resets the state of this generator

@@ -46,6 +46,6 @@ def word_delta() -> None:
     move and its inverse"""
     (w, context) = word_basic()
     w.layer_at(0).delta(Sign(True))
-    w.compile_latex("word_delta", context)
+    w.compile_latex("word_delta", context, True)
     w.layer_at(0).delta(Sign(False))
-    w.compile_latex("word_delta_2", context)
+    w.compile_latex("word_delta_2", context, True)

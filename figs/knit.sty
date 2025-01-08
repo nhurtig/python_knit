@@ -11,17 +11,17 @@
 
 % CONSTANTS
 
-\newcommand{\dxNoUnit}{1.3}            % width of tile without units
-\newcommand{\dyNoUnit}{0.7}            % height of tile without units
+\newcommand{\dxNoUnit}{0.7}            % width of tile without units
+\newcommand{\dyNoUnit}{0.5}            % height of tile without units
 \newcommand{\dx}{\dxNoUnit cm}         % width of tile with units
 \newcommand{\dy}{\dyNoUnit cm}         % height of tile with units
-\newcommand{\strandThickness}{0.07}    % proportion of tile width
-\newcommand{\outlineThickness}{0.1}   % white outline for crossings, proportion of width
-\newcommand{\knitThickness}{0.07}      % proportion of tile width
+\newcommand{\strandThickness}{0.12}    % proportion of tile width
+\newcommand{\outlineThickness}{0.19}   % white outline for crossings, proportion of width
+\newcommand{\knitThickness}{0.12}      % proportion of tile width
 \newcommand{\myPi}{3.1415926535}       % approximation of Pi
 % \newcommand{\myPi}{3}                % alternative simplified value for Pi
 \newcommand{\strandOverlap}{0.00}     % proportion of tile width for overlap
-\newcommand{\loopSpace}{4}             % proportion of strand thickness for loop spacing
+\newcommand{\loopSpace}{3}             % proportion of strand thickness for loop spacing
 \newcommand{\numSamples}{30}
 \newcommand{\loopOpacity}{0.2}
 \newcommand{\lineUpFudge}{0.09} % 0 for no line up fudge, >0 for some
@@ -30,6 +30,12 @@
 % ( #1 * (2 * \lineUpFudge + 1 ) - \lineUpFudge )
 % Environment for knit diagrams
 \newenvironment{knitdiagram}{\begin{tikzpicture}}{\end{tikzpicture}}
+
+% label putter
+% x, y, label
+\newcommand{\knitLabel}[3]{
+\node at (#1 * \dxNoUnit + 0.5 * \dxNoUnit, #2 * \dyNoUnit + 0.5 * \dyNoUnit) {#3};
+}
 
 % cF(0) = -1, cF(1) = 1. Should be smooth and monotonic
 \newcommand{\curveFunc}[1]{%
@@ -130,9 +136,10 @@
     \filldraw (#1*\dx+0.5*\dx,#2*\dy+0.5*\dy) circle (\strandThickness*\dx);
 }
 
-\newcommand{\patchX}{0.115}
+% NOTE: hard-coded values
+\newcommand{\patchX}{0.111}
 \newcommand{\patchY}{0.012}
-\newcommand{\lineX}{0.095}
+\newcommand{\lineX}{0.09}
 \newcommand{\lineY}{0.05}
 % Twist knit (pos/neg, x, y, r, g, b)
 \newcommand{\twist}[6]{
@@ -146,7 +153,10 @@
         % fill
         % NOTE: some horrible order of operations stuff happens between this
         % param setup and the filltwist mult by dxNoUnit
-        \filltwist{#2*\dxNoUnit-\loopSpace*\strandThickness}{#2*\dxNoUnit+\loopSpace*\strandThickness}{#3}{#4}{#5}{#6}{2*\loopSpace*\strandThickness}
+        % NOTE dec 11 2024: changed below mult factor from -1 to -0.6 to fix after
+        % param changes
+        \filltwist{#2*\dxNoUnit-0.6*\loopSpace*\strandThickness}{#2*\dxNoUnit+
+        1*\loopSpace*\strandThickness}{#3}{#4}{#5}{#6}{2*\loopSpace*\strandThickness}
 
         % white patch
         \fill[white]
@@ -168,7 +178,8 @@
     }{
         \identity{(#2-\loopSpace*\strandThickness)}{#3}{2*\loopSpace*\strandThickness}{c}{#4}{#5}{#6}
         \lineknit{(#2+\loopSpace*\strandThickness)}{#3}{-2*\loopSpace*\strandThickness}{c}{1}{1}{1}{line width=\outlineThickness*\dx, color=white}{0}
-        \filltwist{#2*\dxNoUnit-\loopSpace*\strandThickness}{#2*\dxNoUnit+\loopSpace*\strandThickness}{#3}{#4}{#5}{#6}{2*\loopSpace*\strandThickness}
+        % NOTE dec 11 2024: see other note
+        \filltwist{#2*\dxNoUnit-0.6*\loopSpace*\strandThickness}{#2*\dxNoUnit+\loopSpace*\strandThickness}{#3}{#4}{#5}{#6}{2*\loopSpace*\strandThickness}
         % white patch
         \fill[white]
         (#2*\dxNoUnit+0.5*\dxNoUnit - \patchX, #3*\dyNoUnit + 0.5*\dyNoUnit - \patchY) --
