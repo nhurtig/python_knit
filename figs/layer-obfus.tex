@@ -1,0 +1,92 @@
+\documentclass{standalone}
+\usepackage{knit}
+\begin{document}
+\begin{knitdiagram}
+\knitLabel{0}{-1.3}{$r_1$}
+\knitLabel{1}{-1.3}{$s'_1$}
+\knitLabel{2}{-1.3}{$s'_2$}
+\knitLabel{3}{-1.3}{$r_2$}
+\knitBoundBox{0}{0}{4}{1}
+\identity{2}{0}{1}
+{c}{0}{0.65}{0.65}
+\lineknit{3}{0}{-1}
+{c}{1}{1}{1}{line width=\outlineThickness*\dx, color=white}{0}
+\identity{3}{0}{-1}
+{c}{0}{0}{0}
+\identity{0}{0}{0}{c}{0}{0}{0}
+\identity{1}{0}{0}{c}{0}{0.65}{0.65}
+\identity{1}{1}{1}
+{c}{0}{0.65}{0.65}
+\lineknit{2}{1}{-1}
+{c}{1}{1}{1}{line width=\outlineThickness*\dx, color=white}{0}
+\identity{2}{1}{-1}
+{c}{0}{0}{0}
+\identity{0}{1}{0}{c}{0}{0}{0}
+\identity{3}{1}{0}{c}{0}{0.65}{0.65}
+\identity{0}{2}{1}
+{c}{0}{0}{0}
+\lineknit{1}{2}{-1}
+{c}{1}{1}{1}{line width=\outlineThickness*\dx, color=white}{0}
+\identity{1}{2}{-1}
+{c}{0}{0}{0}
+\identity{2}{2}{0}{c}{0}{0.65}{0.65}
+\identity{3}{2}{0}{c}{0}{0.65}{0.65}
+\identity{2}{3}{1}
+{c}{0}{0.65}{0.65}
+\lineknit{3}{3}{-1}
+{c}{1}{1}{1}{line width=\outlineThickness*\dx, color=white}{0}
+\identity{3}{3}{-1}
+{c}{0}{0.65}{0.65}
+\identity{0}{3}{0}{c}{0}{0}{0}
+\identity{1}{3}{0}{c}{0}{0}{0}
+\knit{left}{back}
+{2}{2}{2}{4}
+\identity{0}{4}{0}{c}{0}{0}{0}
+\identity{1}{4}{0}{c}{0}{0}{0}
+\knitBoundBox{0}{5}{4}{1}
+\identity{3}{5}{-1}
+{c}{0}{0.88}{0.88}
+\lineknit{2}{5}{1}
+{c}{1}{1}{1}{line width=\outlineThickness*\dx, color=white}{0}
+\identity{2}{5}{1}
+{c}{0}{0.65}{0.65}
+\identity{0}{5}{0}{c}{0}{0}{0}
+\identity{1}{5}{0}{c}{0}{0}{0}
+\identity{1}{6}{-1}
+{c}{0}{0}{0}
+\lineknit{0}{6}{1}
+{c}{1}{1}{1}{line width=\outlineThickness*\dx, color=white}{0}
+\identity{0}{6}{1}
+{c}{0}{0}{0}
+\identity{2}{6}{0}{c}{0}{0.88}{0.88}
+\identity{3}{6}{0}{c}{0}{0.65}{0.65}
+\identity{2}{7}{-1}
+{c}{0}{0.88}{0.88}
+\lineknit{1}{7}{1}
+{c}{1}{1}{1}{line width=\outlineThickness*\dx, color=white}{0}
+\identity{1}{7}{1}
+{c}{0}{0}{0}
+\identity{0}{7}{0}{c}{0}{0}{0}
+\identity{3}{7}{0}{c}{0}{0.65}{0.65}
+\identity{3}{8}{-1}
+{c}{0}{0.65}{0.65}
+\lineknit{2}{8}{1}
+{c}{1}{1}{1}{line width=\outlineThickness*\dx, color=white}{0}
+\identity{2}{8}{1}
+{c}{0}{0}{0}
+\identity{0}{8}{0}{c}{0}{0}{0}
+\identity{1}{8}{0}{c}{0}{0.88}{0.88}
+\identity{0}{9}{1}
+{c}{0}{0}{0}
+\lineknit{1}{9}{-1}
+{c}{1}{1}{1}{line width=\outlineThickness*\dx, color=white}{0}
+\identity{1}{9}{-1}
+{c}{0}{0.88}{0.88}
+\identity{2}{9}{0}{c}{0}{0.65}{0.65}
+\identity{3}{9}{0}{c}{0}{0}{0}
+\knitLabel{0}{10}{$s_1$}
+\knitLabel{1}{10}{$r_1$}
+\knitLabel{2}{10}{$s_2$}
+\knitLabel{3}{10}{$r_2$}
+\end{knitdiagram}
+\end{document}

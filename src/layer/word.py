@@ -30,8 +30,8 @@ class Word(Latex):
 
         # Whether zero-length braids at the top and
         # bottom are drawn or not
-        self.__draw_preamble = True
-        self.__draw_postamble = True
+        self.__draw_preamble = 1
+        self.__draw_postamble = 1
         self.labels_in: Sequence[str] = []
         self.labels_out: Sequence[str] = []
 
@@ -174,20 +174,20 @@ class Word(Latex):
         """
         self.__braids[index].fuzz(rng, braid_muts)
 
-    def draw_preamble(self, draw: bool) -> None:
+    def draw_preamble(self, draw: int) -> None:
         """Setter
 
         Args:
-            draw (bool): Whether to draw empty braid
+            draw (int): How many times to draw empty braid
             at start
         """
         self.__draw_preamble = draw
 
-    def draw_postamble(self, draw: bool) -> None:
+    def draw_postamble(self, draw: int) -> None:
         """Setter
 
         Args:
-            draw (bool): Whether to draw empty
+            draw (int): How many times to draw empty
             braid at end
         """
         self.__draw_postamble = draw
@@ -225,16 +225,30 @@ class Word(Latex):
     def to_latex(self, x: int, y: int, context: Sequence[PrimitiveObject]) -> str:
         latex_str = ""
         for i, s in enumerate(self.labels_in):
-            latex_str += f"\\knitLabel{{{x+i}}}{{{y-1}}}{{${s}$}}\n"
+            latex_str += f"\\knitLabel{{{x+i}}}{{{y-1.3}}}{{${s}$}}\n"
         for i, o in enumerate(self):
-            if isinstance(o, Braid) and len(o) == 0:
-                if i == 0 and not self.__draw_preamble:
-                    continue
-                if i == len(self) - 1 and not self.__draw_postamble:
-                    continue
-            latex_str += o.to_latex(x, y, context)
-            y += o.latex_height()
-            context = o.context_out(context)
+            num_iters = 1
+            if isinstance(o, Braid):
+                if i == 0:
+                    num_iters = self.__draw_preamble
+                    id_braid = Braid(o.n())
+                    for _ in range(num_iters - o.latex_height()):
+                        latex_str += id_braid.to_latex(x, y, context)
+                        y += id_braid.latex_height()
+                        context = id_braid.context_out(context)
+                if i == len(self) - 1:
+                    num_iters = self.__draw_postamble
+            if num_iters > 0:
+                latex_str += o.to_latex(x, y, context)
+                y += o.latex_height()
+                context = o.context_out(context)
+            if num_iters > 1 and i == len(self) - 1:
+                id_braid = Braid(o.n())
+                for _ in range(num_iters - o.latex_height()):
+                    latex_str += id_braid.to_latex(x, y, context)
+                    y += id_braid.latex_height()
+                    context = id_braid.context_out(context)
+
         for i, s in enumerate(self.labels_out):
             latex_str += f"\\knitLabel{{{x+i}}}{{{y}}}{{${s}$}}\n"
         return latex_str

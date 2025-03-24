@@ -1,0 +1,62 @@
+\documentclass{standalone}
+\usepackage{knit}
+\begin{document}
+\begin{knitdiagram}
+\knitLabel{0}{-1.3}{$r_1$}
+\knitLabel{1}{-1.3}{$s'_1$}
+\knitLabel{2}{-1.3}{$s'_2$}
+\knitLabel{3}{-1.3}{$r_2$}
+\knitBoundBox{0}{0}{4}{1}
+\identity{0}{0}{1}
+{c}{0}{0}{0}
+\lineknit{1}{0}{-1}
+{c}{1}{1}{1}{line width=\outlineThickness*\dx, color=white}{0}
+\identity{1}{0}{-1}
+{c}{0}{0.65}{0.65}
+\identity{2}{0}{0}{c}{0}{0.65}{0.65}
+\identity{3}{0}{0}{c}{0}{0}{0}
+\identity{1}{1}{1}
+{c}{0}{0}{0}
+\lineknit{2}{1}{-1}
+{c}{1}{1}{1}{line width=\outlineThickness*\dx, color=white}{0}
+\identity{2}{1}{-1}
+{c}{0}{0.65}{0.65}
+\identity{0}{1}{0}{c}{0}{0.65}{0.65}
+\identity{3}{1}{0}{c}{0}{0}{0}
+\knit{right}{front}
+{2}{2}{0}{2}
+\identity{2}{2}
+{0}{c}{0}{0}{0}
+\identity{3}{2}
+{0}{c}{0}{0}{0}
+\knitBoundBox{0}{3}{4}{1}
+\identity{2}{3}{-1}
+{c}{0}{0}{0}
+\lineknit{1}{3}{1}
+{c}{1}{1}{1}{line width=\outlineThickness*\dx, color=white}{0}
+\identity{1}{3}{1}
+{c}{0}{0.65}{0.65}
+\identity{0}{3}{0}{c}{0}{0.88}{0.88}
+\identity{3}{3}{0}{c}{0}{0}{0}
+\identity{1}{4}{-1}
+{c}{0}{0}{0}
+\lineknit{0}{4}{1}
+{c}{1}{1}{1}{line width=\outlineThickness*\dx, color=white}{0}
+\identity{0}{4}{1}
+{c}{0}{0.88}{0.88}
+\identity{2}{4}{0}{c}{0}{0.65}{0.65}
+\identity{3}{4}{0}{c}{0}{0}{0}
+\identity{0}{5}{1}
+{c}{0}{0}{0}
+\lineknit{1}{5}{-1}
+{c}{1}{1}{1}{line width=\outlineThickness*\dx, color=white}{0}
+\identity{1}{5}{-1}
+{c}{0}{0.88}{0.88}
+\identity{2}{5}{0}{c}{0}{0.65}{0.65}
+\identity{3}{5}{0}{c}{0}{0}{0}
+\knitLabel{0}{6}{$s_1$}
+\knitLabel{1}{6}{$r_1$}
+\knitLabel{2}{6}{$s_2$}
+\knitLabel{3}{6}{$r_2$}
+\end{knitdiagram}
+\end{document}

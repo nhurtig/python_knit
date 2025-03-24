@@ -5,8 +5,8 @@ from __future__ import annotations
 import colorsys
 
 COLOR_OFFSET: float = 0
-GHOST_LIGHTNESS: float = 0.35
-REGULAR_LIGHTNESS: float = 0.95
+GHOST_LIGHTNESS: float = 0.95
+REGULAR_LIGHTNESS: float = 0.4
 
 
 # van der corput sequence

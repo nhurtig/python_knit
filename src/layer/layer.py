@@ -416,9 +416,35 @@ class Layer(Latex):
 
     def to_latex(self, x: int, y: int, context: Sequence[PrimitiveObject]) -> str:
         str_latex = ""
+        box_height = self.__middle.latex_height()
+
+        if len(self.__middle.ins()) < len(self.__middle.outs()):
+            # like a tuck. Draw curves below
+            straights_offset = len(self.__middle.ins()) if self.__middle.dir() == Dir(True) else 0
+            # straights
+            for i in range(self.__left + straights_offset):
+                o = context[i]
+                (r, g, b) = o.color()
+                for j in range(box_height):
+                    str_latex += (
+                        f"\\identity{{{x+i}}}{{{y+j}}}{{{0}}}{{{o}}}{{{r}}}{{{g}}}{{{b}}}\n"
+                    )
+            # curves
+            for i in range(self.__left + straights_offset, len(context)):
+                o = context[i]
+                (r, g, b) = o.color()
+                for j in range(box_height):
+                    str_latex += f"""\\identity{{{
+                        x+i if j == 0 else
+                        x + i + len(self.__middle.outs()) - len(self.__middle.ins())}}}{{{y+j}}}
+{{{len(self.__middle.outs()) - len(self.__middle.ins()) if j == 0 else 0}}}
+{{{o}}}{{{r}}}{{{g}}}{{{b}}}\n"""
+            y += 1
+
+        # now draw box
+        # straights on left
         box_context_in = context[self.__left : self.__left + len(self.__middle.ins())]
         str_latex += self.__middle.to_latex(x + self.__left, y, box_context_in)
-        box_height = self.__middle.latex_height()
         for i in range(self.__left):
             o = context[i]
             (r, g, b) = o.color()
@@ -427,19 +453,46 @@ class Layer(Latex):
                     f"\\identity{{{x+i}}}{{{y+j}}}{{{0}}}{{{o}}}{{{r}}}{{{g}}}{{{b}}}\n"
                 )
 
+        # straights on right
         for i in range(self.__left + len(self.__middle.ins()), len(context)):
             o = context[i]
             (r, g, b) = o.color()
             for j in range(box_height):
                 str_latex += f"""\\identity{{{
-                    x+i if j == 0 else
                     x + i + len(self.__middle.outs()) - len(self.__middle.ins())}}}{{{y+j}}}
+{{{0}}}{{{o}}}{{{r}}}{{{g}}}{{{b}}}\n"""
+        y += 1
+
+        if len(self.__middle.ins()) > len(self.__middle.outs()):
+            # anti-tuck. Draw curves above
+            straights_offset = len(self.__middle.outs()) if self.__middle.dir() == Dir(True) else 0
+            # straights
+            for i in range(self.__left + straights_offset):
+                o = context[i]
+                (r, g, b) = o.color()
+                for j in range(box_height):
+                    str_latex += (
+                        f"\\identity{{{x+i}}}{{{y+j}}}{{{0}}}{{{o}}}{{{r}}}{{{g}}}{{{b}}}\n"
+                    )
+            # curves
+            for i in range(self.__left + straights_offset, len(context) - len(self.__middle.ins()) + len(self.__middle.outs())):
+                o = context[i]
+                (r, g, b) = o.color()
+                for j in range(box_height):
+                    str_latex += f"""\\identity{{{
+                        x+i if j == 0 else
+                        x + i + len(self.__middle.outs()) - len(self.__middle.ins())}}}{{{y+j}}}
 {{{len(self.__middle.outs()) - len(self.__middle.ins()) if j == 0 else 0}}}
 {{{o}}}{{{r}}}{{{g}}}{{{b}}}\n"""
+            y += 1
+
         return str_latex
 
     def latex_height(self) -> int:
-        return self.__middle.latex_height()
+        knit_height = self.__middle.latex_height()
+        if len(self.__middle.ins()) != len(self.__middle.outs()):
+            return knit_height + 1
+        return knit_height
 
     def context_out(
         self, context: Sequence[PrimitiveObject]

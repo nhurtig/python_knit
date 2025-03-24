@@ -83,8 +83,9 @@ class Knit(Latex):
 
     def to_latex(self, x: int, y: int, context: Sequence[PrimitiveObject]) -> str:
         latex_str = ""
+        width = max(len(self.ins()), len(self.outs()))
         latex_str += f"""\\knit{{{self.__dir}}}{{{self.__bed}}}
-{{{len(self.ins())}}}{{{len(self.outs())}}}{{{x}}}{{{y}}}\n"""
+{{{width}}}{{{width}}}{{{x}}}{{{y}}}\n"""
         for i, o in enumerate(self.outs()):
             (r, g, b) = o.color()
             for j in range(abs(o.twists())):

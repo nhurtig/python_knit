@@ -302,6 +302,9 @@ class Braid(Latex):
 
     def to_latex(self, x: int, y: int, context: Sequence[PrimitiveObject]) -> str:
         str_latex = ""
+        str_latex += (
+            f"\\knitBoundBox{{{x}}}{{{y}}}{{{self.n()}}}{{{1}}}\n"
+        )
         for g in self:
             str_latex += g.to_latex(x, y, context)
             y += g.latex_height()
