@@ -11,7 +11,8 @@ from fig_gen.basic_rewrites import (
     sigma_underline,
     yang_baxter,
 )
-from fig_gen.braid_pres import draw_braid_pres
+from fig_gen.blog_post import post_commute, pre_commute
+from fig_gen.braid_pres import draw_braid_pres, interesting_5
 from fig_gen.canon_example import word_sigma, word_delta
 from fig_gen.full_example import display_word_steps
 from fig_gen.move_past import draw_move_past
@@ -32,6 +33,8 @@ def main() -> None:
     # display_word_steps()
     # draw_poster_word()
     draw_braid_pres()
+    # pre_commute()
+    # post_commute()
 
     # STUFF ACTUALLY IN THE PAPER
     # delta_conj()

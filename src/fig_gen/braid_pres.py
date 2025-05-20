@@ -22,14 +22,20 @@ def ident_5():
 def interesting_5():
     """Two interesting braids on 5 strands"""
     reset_colors()
-    b = Braid.str_to_braid(5, "AbaC")
+    b1 = Braid.str_to_braid(5, "AbaC")
     w = Word(5)
-    w.append_braid(b)
+    w.append_braid(b1)
     w.compile_latex("inter-5", [Carrier(0, (0, 0, 0)) for _ in range(5)])
 
-    b = Braid.str_to_braid(5, "cABa")
+    b1 = Braid.str_to_braid(5, "AbCa")
     w = Word(5)
-    w.append_braid(b)
+    w.append_braid(b1)
+    w.compile_latex("inter-5-syn", [Carrier(0, (0, 0, 0)) for _ in range(5)])
+
+
+    b2 = Braid.str_to_braid(5, "cABa")
+    w = Word(5)
+    w.append_braid(b2)
     w.compile_latex("inter-5-inv", [Carrier(0, (0, 0, 0)) for _ in range(5)])
 
     reset_colors()
@@ -37,6 +43,11 @@ def interesting_5():
     w = Word(5)
     w.append_braid(b)
     w.compile_latex("inter-5-2", [Carrier(0, (0, 0, 0)) for _ in range(5)])
+
+    b = Braid.str_to_braid(5, "AbaCBaCd")
+    w = Word(5)
+    w.append_braid(b)
+    w.compile_latex("inter-5-concat", [Carrier(0, (0, 0, 0)) for _ in range(5)])
 
 def interesting_4():
     """Interesting braid on 4 strands"""
@@ -71,6 +82,17 @@ def synonyms_3():
 
 def comm_diagrams():
     """Draws the commutative diagrams of the braid group"""
+    reset_colors()
+    b = Braid.str_to_braid(2, "aA")
+    b.compile_latex("sc-1", [Carrier(0) for _ in range(2)])
+
+    reset_colors()
+    b = Braid.str_to_braid(2, "")
+    w = Word(2)
+    w.append_braid(b)
+    w.draw_postamble(2)
+    w.compile_latex("sc-2", [Carrier(0) for _ in range(2)])
+
     reset_colors()
     b = Braid.str_to_braid(3, "aba")
     b.compile_latex("yb-1", [Carrier(0) for _ in range(3)])
